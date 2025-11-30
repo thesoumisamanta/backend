@@ -43,7 +43,7 @@ const userSchema = new mongoose.Schema({
     public_id: String,
     url: {
       type: String,
-      default: 'https://res.cloudinary.com/demo/image/upload/v1234567890/default-avatar.png'
+      default: '' 
     }
   },
   coverPhoto: {
@@ -108,35 +108,45 @@ const userSchema = new mongoose.Schema({
   }
 });
 
-// Hash password before saving
-userSchema.pre('save', async function(next) {
-  if (!this.isModified('password')) {
-    next();
+
+userSchema.pre('save', async function (next) {
+  if (!this.profilePicture.url || this.profilePicture.url === '') {
+    const name = encodeURIComponent(this.fullName);
+
+    // Different colors for personal vs business accounts
+    const background = this.accountType === 'business' ? '4285F4' : '34A853';
+
+    this.profilePicture.url = `https://ui-avatars.com/api/?name=${name}&size=512&background=${background}&color=fff&bold=true`;
   }
-  this.password = await bcrypt.hash(this.password, 10);
+
+  if (this.isModified('password')) {
+    this.password = await bcrypt.hash(this.password, 10);
+  }
+
+  next();
 });
 
 // Compare password
-userSchema.methods.comparePassword = async function(enteredPassword) {
+userSchema.methods.comparePassword = async function (enteredPassword) {
   return await bcrypt.compare(enteredPassword, this.password);
 };
 
 // Generate Access Token
-userSchema.methods.getAccessToken = function() {
+userSchema.methods.getAccessToken = function () {
   return jwt.sign({ id: this._id }, process.env.JWT_ACCESS_SECRET, {
     expiresIn: process.env.JWT_ACCESS_EXPIRE
   });
 };
 
 // Generate Refresh Token
-userSchema.methods.getRefreshToken = function() {
+userSchema.methods.getRefreshToken = function () {
   return jwt.sign({ id: this._id }, process.env.JWT_REFRESH_SECRET, {
     expiresIn: process.env.JWT_REFRESH_EXPIRE
   });
 };
 
 // Verify Refresh Token
-userSchema.methods.verifyRefreshToken = function(token) {
+userSchema.methods.verifyRefreshToken = function (token) {
   try {
     const decoded = jwt.verify(token, process.env.JWT_REFRESH_SECRET);
     return decoded.id === this._id.toString();
