@@ -21,10 +21,12 @@ const commentSchema = new mongoose.Schema({
     ref: 'Comment',
     default: null
   },
+  // Store user IDs for likes
   likes: [{
     type: mongoose.Schema.Types.ObjectId,
     ref: 'User'
   }],
+  // Store user IDs for dislikes
   dislikes: [{
     type: mongoose.Schema.Types.ObjectId,
     ref: 'User'
@@ -41,6 +43,21 @@ const commentSchema = new mongoose.Schema({
     type: Number,
     default: 0
   },
+  // Track nesting level (0 = root comment, 1 = reply, 2 = reply to reply, etc.)
+  depth: {
+    type: Number,
+    default: 0
+  },
+  // Track if comment is edited
+  isEdited: {
+    type: Boolean,
+    default: false
+  },
+  // Track if comment is deleted (soft delete)
+  isDeleted: {
+    type: Boolean,
+    default: false
+  },
   createdAt: {
     type: Date,
     default: Date.now
@@ -53,6 +70,24 @@ const commentSchema = new mongoose.Schema({
 
 // Index for faster queries
 commentSchema.index({ post: 1, createdAt: -1 });
-commentSchema.index({ parentComment: 1 });
+commentSchema.index({ parentComment: 1, createdAt: 1 });
+commentSchema.index({ user: 1 });
+
+// Virtual for nested replies
+commentSchema.virtual('replies', {
+  ref: 'Comment',
+  localField: '_id',
+  foreignField: 'parentComment'
+});
+
+// Method to check if user has liked
+commentSchema.methods.hasUserLiked = function(userId) {
+  return this.likes.includes(userId);
+};
+
+// Method to check if user has disliked
+commentSchema.methods.hasUserDisliked = function(userId) {
+  return this.dislikes.includes(userId);
+};
 
 module.exports = mongoose.model('Comment', commentSchema);
