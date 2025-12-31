@@ -173,15 +173,21 @@ exports.sendMessage = async (req, res) => {
 
     await chat.save();
 
-    // Send notification
-    const otherUser = await User.findById(otherUserId);
-    if (otherUser.fcmToken) {
-      await sendNotification(
-        otherUser.fcmToken,
-        `${req.user.username}`,
-        text || 'Sent a media file',
-        { type: 'message', chatId: chat._id.toString() }
-      );
+     // Send notification
+    try {
+      const otherUser = await User.findById(otherUserId);
+      if (otherUser && otherUser.fcmToken) {
+        await sendNotification(
+          otherUser.fcmToken,
+          `${req.user.username}`,
+          text || 'Sent a media file',
+          { type: 'message', chatId: chat._id.toString() }
+        );
+      }
+    } catch (notificationError) {
+      // Log the error but don't fail the request
+      console.error('Failed to send notification:', notificationError.message);
+      // Optionally: You could store failed notifications for retry later
     }
 
     res.status(201).json({
@@ -189,6 +195,8 @@ exports.sendMessage = async (req, res) => {
       message
     });
   } catch (error) {
+    // Only catch database/validation errors
+    console.error('Error sending message:', error);
     res.status(500).json({
       success: false,
       message: error.message
