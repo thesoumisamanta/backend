@@ -5,6 +5,7 @@ const {
   getFeed,
   getUserPosts,
   getPost,
+  getTrendingPosts,
   likePost,
   dislikePost,
   deletePost,
@@ -15,6 +16,7 @@ const upload = require('../middleware/multer');
 
 router.post('/', isAuthenticated, upload.array('media', 10), createPost);
 router.get('/feed', isAuthenticated, getFeed);
+router.get('/trending', isAuthenticated, getTrendingPosts);
 router.get('/user/:userId', isAuthenticated, getUserPosts);
 router.get('/:id', isAuthenticated, getPost);
 router.post('/:id/like', isAuthenticated, likePost);

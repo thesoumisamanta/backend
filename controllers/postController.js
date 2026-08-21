@@ -2,7 +2,7 @@ const Post = require('../models/post.js');
 const User = require('../models/user.js');
 const Notification = require('../models/notification.js');
 const { uploadImage, uploadVideo, deleteFile } = require('../utils/cloudinary');
-const { sendMulticastNotification } = require('../config/firebase');
+const { sendNotification, sendMulticastNotification } = require('../config/firebase');
 
 // Create post
 exports.createPost = async (req, res) => {
@@ -85,6 +85,30 @@ exports.createPost = async (req, res) => {
   }
 };
 
+const formatPost = (postDoc, currentUserId) => {
+  const post = postDoc.toObject ? postDoc.toObject({ virtuals: true }) : postDoc;
+  const userIdStr = currentUserId ? currentUserId.toString() : '';
+  const likesList = post.likes
+    ? post.likes.map(id => (id && (id._id || id.id || id)).toString()).filter(Boolean)
+    : [];
+  const dislikesList = post.dislikes
+    ? post.dislikes.map(id => (id && (id._id || id.id || id)).toString()).filter(Boolean)
+    : [];
+
+  const hasLiked = Boolean(userIdStr && likesList.some(id => id === userIdStr));
+  const hasDisliked = Boolean(userIdStr && dislikesList.some(id => id === userIdStr));
+
+  return {
+    ...post,
+    likes: likesList,
+    dislikes: dislikesList,
+    likesCount: post.likesCount ?? likesList.length,
+    dislikesCount: post.dislikesCount ?? dislikesList.length,
+    hasLiked,
+    hasDisliked,
+  };
+};
+
 // Get feed (posts from following users)
 exports.getFeed = async (req, res) => {
   try {
@@ -93,25 +117,58 @@ exports.getFeed = async (req, res) => {
     const skip = (page - 1) * limit;
 
     const user = await User.findById(req.user.id);
+    const followingIds = (user && user.following) ? user.following.map(id => id.toString()) : [];
+    
+    // Include user's own posts and posts from followed users, or all posts if following list is empty
+    const filter = (followingIds.length > 0)
+      ? { user: { $in: [...followingIds, req.user._id.toString()] } }
+      : {};
 
-    const posts = await Post.find({
-      user: { $in: [...user.following, req.user.id] }
-    })
+    const posts = await Post.find(filter)
       .populate('user', 'username fullName profilePicture accountType isVerified')
       .sort({ createdAt: -1 })
       .skip(skip)
       .limit(limit);
 
-    const total = await Post.countDocuments({
-      user: { $in: [...user.following, req.user.id] }
-    });
+    const total = await Post.countDocuments(filter);
+
+    const formattedPosts = posts.map(post => formatPost(post, req.user._id));
 
     res.status(200).json({
       success: true,
-      posts,
+      posts: formattedPosts,
       currentPage: page,
       totalPages: Math.ceil(total / limit),
       totalPosts: total
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: error.message
+    });
+  }
+};
+
+// Get trending posts from following users (top 5 most liked)
+exports.getTrendingPosts = async (req, res) => {
+  try {
+    const user = await User.findById(req.user.id);
+    const followingIds = (user && user.following) ? user.following.map(id => id.toString()) : [];
+
+    const filter = (followingIds.length > 0)
+      ? { user: { $in: followingIds } }
+      : {};
+
+    const posts = await Post.find(filter)
+      .populate('user', 'username fullName profilePicture accountType isVerified')
+      .sort({ likesCount: -1, createdAt: -1 })
+      .limit(5);
+
+    const formattedPosts = posts.map(post => formatPost(post, req.user._id));
+
+    res.status(200).json({
+      success: true,
+      posts: formattedPosts
     });
   } catch (error) {
     res.status(500).json({
@@ -142,9 +199,11 @@ exports.getUserPosts = async (req, res) => {
 
     const total = await Post.countDocuments(query);
 
+    const formattedPosts = posts.map(post => formatPost(post, req.user._id));
+
     res.status(200).json({
       success: true,
-      posts,
+      posts: formattedPosts,
       currentPage: page,
       totalPages: Math.ceil(total / limit),
       totalPosts: total
@@ -174,15 +233,13 @@ exports.getPost = async (req, res) => {
     post.viewsCount += 1;
     await post.save();
 
-    // Check if current user liked/disliked
-    const hasLiked = post.likes.includes(req.user.id);
-    const hasDisliked = post.dislikes.includes(req.user.id);
+    const formattedPost = formatPost(post, req.user._id);
 
     res.status(200).json({
       success: true,
-      post,
-      hasLiked,
-      hasDisliked
+      post: formattedPost,
+      hasLiked: formattedPost.hasLiked,
+      hasDisliked: formattedPost.hasDisliked
     });
   } catch (error) {
     res.status(500).json({
@@ -191,6 +248,7 @@ exports.getPost = async (req, res) => {
     });
   }
 };
+
 // Like/Unlike post
 exports.likePost = async (req, res) => {
   try {
@@ -203,38 +261,39 @@ exports.likePost = async (req, res) => {
       });
     }
 
-    const hasLiked = post.likes.includes(req.user.id);
-    const hasDisliked = post.dislikes.includes(req.user.id);
+    const userIdStr = req.user._id.toString();
+    const hasLiked = post.likes.some(id => (id._id || id).toString() === userIdStr);
+    const hasDisliked = post.dislikes.some(id => (id._id || id).toString() === userIdStr);
 
     if (hasLiked) {
       // Unlike
-      post.likes.pull(req.user.id);
-      post.likesCount -= 1;
+      post.likes = post.likes.filter(id => (id._id || id).toString() !== userIdStr);
+      post.likesCount = Math.max(0, post.likesCount - 1);
     } else {
       // Like
-      post.likes.push(req.user.id);
+      post.likes.push(req.user._id);
       post.likesCount += 1;
 
       // Remove dislike if exists
       if (hasDisliked) {
-        post.dislikes.pull(req.user.id);
-        post.dislikesCount -= 1;
+        post.dislikes = post.dislikes.filter(id => (id._id || id).toString() !== userIdStr);
+        post.dislikesCount = Math.max(0, post.dislikesCount - 1);
       }
 
       // Create notification if not own post
-      if (post.user.toString() !== req.user.id) {
+      if (post.user.toString() !== userIdStr) {
         const user = await User.findById(post.user);
 
         await Notification.create({
           recipient: post.user,
-          sender: req.user.id,
+          sender: req.user._id,
           type: 'like',
           post: post._id,
           message: `${req.user.username} liked your post`
         });
 
         // Send push notification
-        if (user.fcmToken) {
+        if (user && user.fcmToken) {
           await sendNotification(
             user.fcmToken,
             'New Like',
@@ -244,6 +303,8 @@ exports.likePost = async (req, res) => {
       }
     }
 
+    post.markModified('likes');
+    post.markModified('dislikes');
     await post.save();
 
     res.status(200).json({
@@ -273,25 +334,28 @@ exports.dislikePost = async (req, res) => {
       });
     }
 
-    const hasLiked = post.likes.includes(req.user.id);
-    const hasDisliked = post.dislikes.includes(req.user.id);
+    const userIdStr = req.user._id.toString();
+    const hasLiked = post.likes.some(id => (id._id || id).toString() === userIdStr);
+    const hasDisliked = post.dislikes.some(id => (id._id || id).toString() === userIdStr);
 
     if (hasDisliked) {
       // Remove dislike
-      post.dislikes.pull(req.user.id);
-      post.dislikesCount -= 1;
+      post.dislikes = post.dislikes.filter(id => (id._id || id).toString() !== userIdStr);
+      post.dislikesCount = Math.max(0, post.dislikesCount - 1);
     } else {
       // Dislike
-      post.dislikes.push(req.user.id);
+      post.dislikes.push(req.user._id);
       post.dislikesCount += 1;
 
       // Remove like if exists
       if (hasLiked) {
-        post.likes.pull(req.user.id);
-        post.likesCount -= 1;
+        post.likes = post.likes.filter(id => (id._id || id).toString() !== userIdStr);
+        post.likesCount = Math.max(0, post.likesCount - 1);
       }
     }
 
+    post.markModified('likes');
+    post.markModified('dislikes');
     await post.save();
 
     res.status(200).json({

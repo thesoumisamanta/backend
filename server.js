@@ -53,7 +53,7 @@ app.use(errorHandler);
 const PORT = process.env.PORT || 5000;
 
 const server = app.listen(PORT, '0.0.0.0', () => {
-  console.log(`Server running on port ${PORT} on all interfaces`);
+  console.log(`Server running on port ${PORT} on all interfaces: https://localhost:${PORT}`);
 });
 
 // Handle unhandled promise rejections
