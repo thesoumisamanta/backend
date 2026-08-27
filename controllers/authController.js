@@ -1,8 +1,8 @@
 const User = require('../models/user.js');
 const sendEmail = require('../utils/sendEmail.js');
 
-// Send tokens in cookies
-const sendTokens = async (user, statusCode, res) => {
+// Send tokens in cookies & data object
+const sendTokens = async (user, statusCode, res, message = 'Login successful') => {
   const accessToken = user.getAccessToken();
   const refreshToken = user.getRefreshToken();
 
@@ -25,36 +25,17 @@ const sendTokens = async (user, statusCode, res) => {
     sameSite: 'strict'
   };
 
-  const userResponse = {
-    _id: user._id,
-    username: user.username,
-    email: user.email,
-    fullName: user.fullName,
-    accountType: user.accountType,
-    bio: user.bio,
-    profilePicture: user.profilePicture,
-    coverPhoto: user.coverPhoto,
-    location: user.location,
-    website: user.website,
-    businessEmail: user.businessEmail,
-    followersCount: user.followersCount,
-    followingCount: user.followingCount,
-    postsCount: user.postsCount,
-    isVerified: user.isVerified,
-    isEmailVerified: user.isEmailVerified,
-    isPrivate: user.isPrivate,
-    createdAt: user.createdAt
-  };
-
   res
     .status(statusCode)
     .cookie('accessToken', accessToken, accessTokenOptions)
     .cookie('refreshToken', refreshToken, refreshTokenOptions)
     .json({
       success: true,
-      user: userResponse,
-      accessToken,
-      refreshToken
+      message,
+      data: {
+        accessToken,
+        refreshToken
+      }
     });
 };
 
