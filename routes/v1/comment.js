@@ -10,8 +10,8 @@ const {
   updateComment,
   getCommentLikes,
   getCommentDislikes
-} = require('../controllers/commentController');
-const { isAuthenticated } = require('../middleware/auth');
+} = require('../../controllers/commentController');
+const { isAuthenticated } = require('../../middleware/auth');
 
 // Comment CRUD
 router.post('/post/:postId', isAuthenticated, createComment);

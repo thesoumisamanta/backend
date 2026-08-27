@@ -7,9 +7,9 @@ const {
   searchUsers,
   getFollowers,
   getFollowing
-} = require('../controllers/userController');
-const { isAuthenticated } = require('../middleware/auth');
-const upload = require('../middleware/multer');
+} = require('../../controllers/userController');
+const { isAuthenticated } = require('../../middleware/auth');
+const upload = require('../../middleware/multer');
 
 router.get('/profile/:id', isAuthenticated, getUserProfile);
 router.put('/profile', isAuthenticated, upload.fields([

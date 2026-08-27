@@ -6,9 +6,9 @@ const {
   sendMessage,
   getMessages,
   markAsRead
-} = require('../controllers/chatController');
-const { isAuthenticated } = require('../middleware/auth');
-const upload = require('../middleware/multer');
+} = require('../../controllers/chatController');
+const { isAuthenticated } = require('../../middleware/auth');
+const upload = require('../../middleware/multer');
 
 router.get('/user/:userId', isAuthenticated, getOrCreateChat);
 router.get('/', isAuthenticated, getChats);

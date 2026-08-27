@@ -7,9 +7,9 @@ const {
   viewStory,
   deleteStory,
   getStoryViewers
-} = require('../controllers/storyController');
-const { isAuthenticated } = require('../middleware/auth');
-const upload = require('../middleware/multer');
+} = require('../../controllers/storyController');
+const { isAuthenticated } = require('../../middleware/auth');
+const upload = require('../../middleware/multer');
 
 router.post('/', isAuthenticated, upload.single('media'), createStory);
 router.get('/following', isAuthenticated, getFollowingStories);

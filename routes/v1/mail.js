@@ -7,8 +7,8 @@ const {
   getSentMails,
   getMailThread,
   deleteMail
-} = require('../controllers/mailController');
-const { isAuthenticated } = require('../middleware/auth');
+} = require('../../controllers/mailController');
+const { isAuthenticated } = require('../../middleware/auth');
 
 router.post('/send', isAuthenticated, sendMail);
 router.post('/:mailId/reply', isAuthenticated, replyToMail);

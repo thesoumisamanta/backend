@@ -1,4 +1,5 @@
 const User = require('../models/user.js');
+const sendEmail = require('../utils/sendEmail.js');
 
 // Send tokens in cookies
 const sendTokens = async (user, statusCode, res) => {
@@ -40,6 +41,7 @@ const sendTokens = async (user, statusCode, res) => {
     followingCount: user.followingCount,
     postsCount: user.postsCount,
     isVerified: user.isVerified,
+    isEmailVerified: user.isEmailVerified,
     isPrivate: user.isPrivate,
     createdAt: user.createdAt
   };
@@ -56,30 +58,180 @@ const sendTokens = async (user, statusCode, res) => {
     });
 };
 
-// Register user
+// Register user (Sends Verification OTP)
 exports.register = async (req, res, next) => {
   try {
     const { username, email, password, fullName, accountType } = req.body;
 
-    // Check if user already exists
-    let user = await User.findOne({ $or: [{ email }, { username }] });
-
-    if (user) {
+    if (!username || !email || !password || !fullName) {
       return res.status(400).json({
         success: false,
-        message: 'User already exists with this email or username'
+        message: 'Please fill in all required fields'
       });
     }
 
-    user = await User.create({
-      username,
-      email,
-      password,
-      fullName,
-      accountType: accountType || 'personal'
+    const normalizedEmail = email.toLowerCase().trim();
+    const normalizedUsername = username.trim();
+
+    // Check if user already exists
+    let user = await User.findOne({
+      $or: [{ email: normalizedEmail }, { username: normalizedUsername }]
     });
 
-    sendTokens(user, 201, res);
+    if (user) {
+      // If user exists and is already email verified
+      if (user.isEmailVerified) {
+        return res.status(400).json({
+          success: false,
+          message: 'User already exists with this email or username'
+        });
+      }
+
+      // If user exists but email is NOT verified, update their info and re-send verification OTP
+      const otp = Math.floor(100000 + Math.random() * 900000).toString();
+      user.username = normalizedUsername;
+      user.email = normalizedEmail;
+      user.password = password;
+      user.fullName = fullName;
+      user.accountType = accountType || 'personal';
+      user.emailVerificationOTP = otp;
+      user.emailVerificationOTPExpire = new Date(Date.now() + 10 * 60 * 1000);
+      await user.save();
+
+      await sendEmail({
+        email: user.email,
+        subject: 'Travel Diary - Verify Your Email Address',
+        otp,
+        type: 'VERIFICATION'
+      });
+
+      return res.status(200).json({
+        success: true,
+        message: 'Registration successful! OTP code sent to your email address.'
+      });
+    }
+
+    // Generate 6-digit OTP code for new user
+    const otp = Math.floor(100000 + Math.random() * 900000).toString();
+
+    user = await User.create({
+      username: normalizedUsername,
+      email: normalizedEmail,
+      password,
+      fullName,
+      accountType: accountType || 'personal',
+      isEmailVerified: false,
+      emailVerificationOTP: otp,
+      emailVerificationOTPExpire: new Date(Date.now() + 10 * 60 * 1000)
+    });
+
+    await sendEmail({
+      email: user.email,
+      subject: 'Travel Diary - Verify Your Email Address',
+      otp,
+      type: 'VERIFICATION'
+    });
+
+    res.status(201).json({
+      success: true,
+      message: 'Registration successful! OTP code sent to your email address.'
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: error.message
+    });
+  }
+};
+
+// Verify Registration Email OTP
+exports.verifyEmailOTP = async (req, res) => {
+  try {
+    const { email, otp } = req.body;
+
+    if (!email || !otp) {
+      return res.status(400).json({
+        success: false,
+        message: 'Please provide email and verification OTP code'
+      });
+    }
+
+    const user = await User.findOne({
+      email: email.toLowerCase().trim(),
+      emailVerificationOTP: otp,
+      emailVerificationOTPExpire: { $gt: Date.now() }
+    });
+
+    if (!user) {
+      return res.status(400).json({
+        success: false,
+        message: 'Invalid or expired verification OTP code'
+      });
+    }
+
+    user.isEmailVerified = true;
+    user.emailVerificationOTP = undefined;
+    user.emailVerificationOTPExpire = undefined;
+    await user.save();
+
+    res.status(200).json({
+      success: true,
+      message: 'OTP verified successfully'
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: error.message
+    });
+  }
+};
+
+// Resend Registration Email OTP
+exports.resendEmailOTP = async (req, res) => {
+  try {
+    const { email } = req.body;
+
+    if (!email) {
+      return res.status(400).json({
+        success: false,
+        message: 'Please provide your email address'
+      });
+    }
+
+    const user = await User.findOne({ email: email.toLowerCase().trim() });
+
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        message: 'User account not found'
+      });
+    }
+
+    if (user.isEmailVerified) {
+      return res.status(400).json({
+        success: false,
+        message: 'Email address is already verified. Please log in.'
+      });
+    }
+
+    const otp = Math.floor(100000 + Math.random() * 900000).toString();
+
+    user.emailVerificationOTP = otp;
+    user.emailVerificationOTPExpire = new Date(Date.now() + 10 * 60 * 1000);
+    await user.save({ validateBeforeSave: false });
+
+    await sendEmail({
+      email: user.email,
+      subject: 'Travel Diary - Verify Your Email Address',
+      otp,
+      type: 'VERIFICATION'
+    });
+
+    res.status(200).json({
+      success: true,
+      message: 'Verification OTP resent to your email address',
+      otp: process.env.NODE_ENV !== 'production' ? otp : undefined
+    });
   } catch (error) {
     res.status(500).json({
       success: false,
@@ -102,8 +254,8 @@ exports.login = async (req, res, next) => {
 
     const user = await User.findOne({
       $or: [
-        { email: emailOrUsername },
-        { username: emailOrUsername }
+        { email: emailOrUsername.toLowerCase().trim() },
+        { username: emailOrUsername.trim() }
       ]
     }).select('+password');
 
@@ -120,6 +272,16 @@ exports.login = async (req, res, next) => {
       return res.status(401).json({
         success: false,
         message: 'Invalid credentials'
+      });
+    }
+
+    // Check if email is verified
+    if (!user.isEmailVerified) {
+      return res.status(403).json({
+        success: false,
+        requiresVerification: true,
+        email: user.email,
+        message: 'Email address is not verified. Please verify your email first.'
       });
     }
 
@@ -240,6 +402,142 @@ exports.updateFCMToken = async (req, res, next) => {
     res.status(200).json({
       success: true,
       message: 'FCM token updated successfully'
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: error.message
+    });
+  }
+};
+
+// Forgot Password - Send OTP
+exports.forgotPassword = async (req, res) => {
+  try {
+    const { email } = req.body;
+
+    if (!email) {
+      return res.status(400).json({
+        success: false,
+        message: 'Please provide your registered email address'
+      });
+    }
+
+    const user = await User.findOne({ email: email.toLowerCase().trim() });
+
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        message: 'No account found with this email address'
+      });
+    }
+
+    // Generate 6-digit OTP
+    const otp = Math.floor(100000 + Math.random() * 900000).toString();
+
+    user.resetPasswordOTP = otp;
+    user.resetPasswordOTPExpire = new Date(Date.now() + 10 * 60 * 1000); // 10 minutes expiry
+    await user.save({ validateBeforeSave: false });
+
+    await sendEmail({
+      email: user.email,
+      subject: 'Travel Diary - Password Reset OTP',
+      otp,
+      type: 'RESET'
+    });
+
+    res.status(200).json({
+      success: true,
+      message: 'Verification OTP sent to your email address',
+      otp: process.env.NODE_ENV !== 'production' ? otp : undefined
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: error.message
+    });
+  }
+};
+
+// Verify OTP
+exports.verifyOTP = async (req, res) => {
+  try {
+    const { email, otp } = req.body;
+
+    if (!email || !otp) {
+      return res.status(400).json({
+        success: false,
+        message: 'Email and OTP are required'
+      });
+    }
+
+    const user = await User.findOne({
+      email: email.toLowerCase().trim(),
+      resetPasswordOTP: otp,
+      resetPasswordOTPExpire: { $gt: Date.now() }
+    });
+
+    if (!user) {
+      return res.status(400).json({
+        success: false,
+        message: 'Invalid or expired OTP code'
+      });
+    }
+
+    res.status(200).json({
+      success: true,
+      message: 'OTP verified successfully'
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: error.message
+    });
+  }
+};
+
+// Reset Password
+exports.resetPassword = async (req, res) => {
+  try {
+    const { email, otp, newPassword } = req.body;
+
+    if (!email || !otp || !newPassword) {
+      return res.status(400).json({
+        success: false,
+        message: 'Please provide email, OTP, and new password'
+      });
+    }
+
+    if (newPassword.length < 6) {
+      return res.status(400).json({
+        success: false,
+        message: 'Password must be at least 6 characters long'
+      });
+    }
+
+    const user = await User.findOne({
+      email: email.toLowerCase().trim(),
+      resetPasswordOTP: otp,
+      resetPasswordOTPExpire: { $gt: Date.now() }
+    }).select('+password');
+
+    if (!user) {
+      return res.status(400).json({
+        success: false,
+        message: 'Invalid or expired OTP code. Please request a new code.'
+      });
+    }
+
+    // Set new password
+    user.password = newPassword;
+    user.resetPasswordOTP = undefined;
+    user.resetPasswordOTPExpire = undefined;
+
+    await user.save();
+
+    res.status(200).json({
+      success: true,
+      message: 'Password reset successfully! Please log in with your new password.'
     });
   } catch (error) {
     res.status(500).json({

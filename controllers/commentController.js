@@ -124,23 +124,24 @@ exports.getPostComments = async (req, res) => {
     const limit = parseInt(req.query.limit) || 20;
     const skip = (page - 1) * limit;
 
-    // Get only parent comments (not replies)
-    const comments = await Comment.find({
+    // Get only parent comments (not replies), including deleted comments if they have replies
+    const filter = {
       post: req.params.postId,
       parentComment: null,
-      isDeleted: { $ne: true }
-    })
+      $or: [
+        { isDeleted: { $ne: true } },
+        { repliesCount: { $gt: 0 } }
+      ]
+    };
+
+    const comments = await Comment.find(filter)
       .populate('user', 'username fullName profilePicture accountType isVerified')
       .sort({ createdAt: -1 })
       .skip(skip)
       .limit(limit)
       .lean();
 
-    const total = await Comment.countDocuments({
-      post: req.params.postId,
-      parentComment: null,
-      isDeleted: { $ne: true }
-    });
+    const total = await Comment.countDocuments(filter);
 
     // Add hasLiked and hasDisliked flags
     const commentsWithFlags = comments.map(comment => ({
@@ -171,20 +172,22 @@ exports.getCommentReplies = async (req, res) => {
     const limit = parseInt(req.query.limit) || 10;
     const skip = (page - 1) * limit;
 
-    const replies = await Comment.find({
+    const filter = {
       parentComment: req.params.commentId,
-      isDeleted: { $ne: true }
-    })
+      $or: [
+        { isDeleted: { $ne: true } },
+        { repliesCount: { $gt: 0 } }
+      ]
+    };
+
+    const replies = await Comment.find(filter)
       .populate('user', 'username fullName profilePicture accountType isVerified')
       .sort({ createdAt: 1 })
       .skip(skip)
       .limit(limit)
       .lean();
 
-    const total = await Comment.countDocuments({
-      parentComment: req.params.commentId,
-      isDeleted: { $ne: true }
-    });
+    const total = await Comment.countDocuments(filter);
 
     // Add hasLiked and hasDisliked flags
     const repliesWithFlags = replies.map(reply => ({

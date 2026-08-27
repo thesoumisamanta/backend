@@ -10,9 +10,9 @@ const {
   dislikePost,
   deletePost,
   sharePost
-} = require('../controllers/postController');
-const { isAuthenticated } = require('../middleware/auth');
-const upload = require('../middleware/multer');
+} = require('../../controllers/postController');
+const { isAuthenticated } = require('../../middleware/auth');
+const upload = require('../../middleware/multer');
 
 router.post('/', isAuthenticated, upload.array('media', 10), createPost);
 router.get('/feed', isAuthenticated, getFeed);

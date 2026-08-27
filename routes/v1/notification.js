@@ -5,8 +5,8 @@ const {
   markAsRead,
   markAllAsRead,
   deleteNotification
-} = require('../controllers/notificationController');
-const { isAuthenticated } = require('../middleware/auth');
+} = require('../../controllers/notificationController');
+const { isAuthenticated } = require('../../middleware/auth');
 
 router.get('/', isAuthenticated, getNotifications);
 router.put('/:id/read', isAuthenticated, markAsRead);
