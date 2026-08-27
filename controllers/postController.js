@@ -119,10 +119,8 @@ exports.getFeed = async (req, res) => {
     const user = await User.findById(req.user.id);
     const followingIds = (user && user.following) ? user.following.map(id => id.toString()) : [];
     
-    // Include user's own posts and posts from followed users, or all posts if following list is empty
-    const filter = (followingIds.length > 0)
-      ? { user: { $in: [...followingIds, req.user._id.toString()] } }
-      : {};
+    // Include user's own posts and posts from followed users
+    const filter = { user: { $in: [...followingIds, req.user._id.toString()] } };
 
     const posts = await Post.find(filter)
       .populate('user', 'username fullName profilePicture accountType isVerified')
@@ -155,9 +153,7 @@ exports.getTrendingPosts = async (req, res) => {
     const user = await User.findById(req.user.id);
     const followingIds = (user && user.following) ? user.following.map(id => id.toString()) : [];
 
-    const filter = (followingIds.length > 0)
-      ? { user: { $in: followingIds } }
-      : {};
+    const filter = { user: { $in: [...followingIds, req.user._id.toString()] } };
 
     const posts = await Post.find(filter)
       .populate('user', 'username fullName profilePicture accountType isVerified')
