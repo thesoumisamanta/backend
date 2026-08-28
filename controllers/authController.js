@@ -291,7 +291,7 @@ exports.login = async (req, res, next) => {
 // Refresh access token
 exports.refreshToken = async (req, res, next) => {
   try {
-    const { refreshToken } = req.cookies;
+    const refreshToken = req.cookies.refreshToken || req.body.refreshToken || req.headers['x-refresh-token'];
 
     if (!refreshToken) {
       return res.status(401).json({

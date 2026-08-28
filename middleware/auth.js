@@ -3,9 +3,14 @@ const User = require('../models/user.js');
 
 exports.isAuthenticated = async (req, res, next) => {
   try {
-    const { accessToken } = req.cookies;
+    let token = req.cookies.accessToken;
 
-    if (!accessToken) {
+    // Check Authorization header (Bearer token) if cookie is not present
+    if (!token && req.headers.authorization && req.headers.authorization.startsWith('Bearer ')) {
+      token = req.headers.authorization.split(' ')[1];
+    }
+
+    if (!token) {
       return res.status(401).json({
         success: false,
         message: 'Please login to access this resource',
@@ -14,7 +19,7 @@ exports.isAuthenticated = async (req, res, next) => {
     }
 
     try {
-      const decoded = jwt.verify(accessToken, process.env.JWT_ACCESS_SECRET);
+      const decoded = jwt.verify(token, process.env.JWT_ACCESS_SECRET);
       req.user = await User.findById(decoded.id);
 
       if (!req.user) {
