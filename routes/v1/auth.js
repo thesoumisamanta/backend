@@ -23,7 +23,10 @@ router.post('/refresh-token', refreshToken);
 router.post('/forgot-password', forgotPassword);
 router.post('/verify-otp', verifyOTP);
 router.post('/reset-password', resetPassword);
-router.get('/logout', isAuthenticated, logout);
+
+// Standard REST Logout
+router.post('/logout', isAuthenticated, logout);
+
 router.get('/me', isAuthenticated, getMe);
 router.put('/fcm-token', isAuthenticated, updateFCMToken);
 

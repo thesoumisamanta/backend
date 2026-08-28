@@ -6,7 +6,10 @@ const {
   followUnfollowUser,
   searchUsers,
   getFollowers,
-  getFollowing
+  getFollowing,
+  changePassword,
+  updateAccountSettings,
+  deleteAccount
 } = require('../../controllers/userController');
 const { isAuthenticated } = require('../../middleware/auth');
 const upload = require('../../middleware/multer');
@@ -16,9 +19,15 @@ router.put('/profile', isAuthenticated, upload.fields([
   { name: 'profilePicture', maxCount: 1 },
   { name: 'coverPhoto', maxCount: 1 }
 ]), updateProfile);
+
 router.post('/follow/:id', isAuthenticated, followUnfollowUser);
 router.get('/search', isAuthenticated, searchUsers);
 router.get('/:id/followers', isAuthenticated, getFollowers);
 router.get('/:id/following', isAuthenticated, getFollowing);
+
+// Account Settings & Security Routes
+router.put('/change-password', isAuthenticated, changePassword);
+router.put('/settings/privacy', isAuthenticated, updateAccountSettings);
+router.delete('/account', isAuthenticated, deleteAccount);
 
 module.exports = router;

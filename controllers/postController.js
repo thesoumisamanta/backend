@@ -40,13 +40,22 @@ exports.createPost = async (req, res) => {
       }
     }
 
+    let locationData = location;
+    if (typeof location === 'string' && location.trim() !== '') {
+      try {
+        locationData = JSON.parse(location);
+      } catch (e) {
+        locationData = { name: location };
+      }
+    }
+
     const post = await Post.create({
       user: req.user.id,
       caption,
-      postType,
+      postType: postType || 'photo',
       media: mediaArray,
-      location,
-      tags: tags ? tags.split(',').map(tag => tag.trim()) : []
+      location: locationData,
+      tags: tags ? (typeof tags === 'string' ? tags.split(',').map(tag => tag.trim()) : tags) : []
     });
 
     // Update user's post count
