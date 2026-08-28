@@ -9,6 +9,7 @@ const storyRoutes = require('./story');
 const chatRoutes = require('./chat');
 const mailRoutes = require('./mail');
 const notificationRoutes = require('./notification');
+const legalRoutes = require('./legal');
 
 // API v1 Health Check
 router.get('/health', (req, res) => {
@@ -28,5 +29,6 @@ router.use('/stories', storyRoutes);
 router.use('/chats', chatRoutes);
 router.use('/mails', mailRoutes);
 router.use('/notifications', notificationRoutes);
+router.use('/legal', legalRoutes);
 
 module.exports = router;
