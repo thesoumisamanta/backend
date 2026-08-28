@@ -25,8 +25,11 @@ exports.getUserProfile = async (req, res) => {
 
     res.status(200).json({
       success: true,
-      user,
-      isFollowing
+      message: 'User profile retrieved successfully',
+      data: {
+        user,
+        isFollowing
+      }
     });
   } catch (error) {
     res.status(500).json({
@@ -90,7 +93,10 @@ exports.updateProfile = async (req, res) => {
 
     res.status(200).json({
       success: true,
-      user
+      message: 'Profile updated successfully',
+      data: {
+        user
+      }
     });
   } catch (error) {
     res.status(500).json({
@@ -143,7 +149,9 @@ exports.followUnfollowUser = async (req, res) => {
       res.status(200).json({
         success: true,
         message: 'User unfollowed successfully',
-        isFollowing: false
+        data: {
+          isFollowing: false
+        }
       });
     } else {
       // Follow
@@ -175,7 +183,9 @@ exports.followUnfollowUser = async (req, res) => {
       res.status(200).json({
         success: true,
         message: 'User followed successfully',
-        isFollowing: true
+        data: {
+          isFollowing: true
+        }
       });
     }
   } catch (error) {
@@ -209,7 +219,10 @@ exports.searchUsers = async (req, res) => {
 
     res.status(200).json({
       success: true,
-      users
+      message: 'Users retrieved successfully',
+      data: {
+        users
+      }
     });
   } catch (error) {
     res.status(500).json({
@@ -234,7 +247,10 @@ exports.getFollowers = async (req, res) => {
 
     res.status(200).json({
       success: true,
-      followers: user.followers
+      message: 'Followers retrieved successfully',
+      data: {
+        followers: user.followers
+      }
     });
   } catch (error) {
     res.status(500).json({
@@ -259,7 +275,10 @@ exports.getFollowing = async (req, res) => {
 
     res.status(200).json({
       success: true,
-      following: user.following
+      message: 'Following users retrieved successfully',
+      data: {
+        following: user.following
+      }
     });
   } catch (error) {
     res.status(500).json({
@@ -296,7 +315,8 @@ exports.changePassword = async (req, res) => {
 
     res.status(200).json({
       success: true,
-      message: 'Password updated successfully'
+      message: 'Password updated successfully',
+      data: null
     });
   } catch (error) {
     res.status(500).json({
@@ -320,7 +340,9 @@ exports.updateAccountSettings = async (req, res) => {
     res.status(200).json({
       success: true,
       message: 'Account settings updated successfully',
-      user
+      data: {
+        user
+      }
     });
   } catch (error) {
     res.status(500).json({
@@ -406,7 +428,8 @@ exports.deleteAccount = async (req, res) => {
       .status(200)
       .json({
         success: true,
-        message: 'Account deleted successfully'
+        message: 'Account deleted successfully',
+        data: null
       });
   } catch (error) {
     res.status(500).json({

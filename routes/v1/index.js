@@ -15,8 +15,10 @@ const legalRoutes = require('./legal');
 router.get('/health', (req, res) => {
   res.status(200).json({
     success: true,
-    version: 'v1',
-    message: 'Server API v1 is healthy and running'
+    message: 'Server API v1 is healthy and running',
+    data: {
+      version: 'v1'
+    }
   });
 });
 

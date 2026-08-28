@@ -103,10 +103,13 @@ exports.createComment = async (req, res) => {
 
     res.status(201).json({
       success: true,
-      comment: {
-        ...comment.toObject(),
-        hasLiked: false,
-        hasDisliked: false
+      message: 'Comment created successfully',
+      data: {
+        comment: {
+          ...comment.toObject(),
+          hasLiked: false,
+          hasDisliked: false
+        }
       }
     });
   } catch (error) {
@@ -152,10 +155,13 @@ exports.getPostComments = async (req, res) => {
 
     res.status(200).json({
       success: true,
-      comments: commentsWithFlags,
-      currentPage: page,
-      totalPages: Math.ceil(total / limit),
-      totalComments: total
+      message: 'Comments retrieved successfully',
+      data: {
+        comments: commentsWithFlags,
+        currentPage: page,
+        totalPages: Math.ceil(total / limit),
+        totalComments: total
+      }
     });
   } catch (error) {
     res.status(500).json({
@@ -198,10 +204,13 @@ exports.getCommentReplies = async (req, res) => {
 
     res.status(200).json({
       success: true,
-      replies: repliesWithFlags,
-      currentPage: page,
-      totalPages: Math.ceil(total / limit),
-      totalReplies: total
+      message: 'Comment replies retrieved successfully',
+      data: {
+        replies: repliesWithFlags,
+        currentPage: page,
+        totalPages: Math.ceil(total / limit),
+        totalReplies: total
+      }
     });
   } catch (error) {
     res.status(500).json({
@@ -240,10 +249,13 @@ exports.updateComment = async (req, res) => {
 
     res.status(200).json({
       success: true,
-      comment: {
-        ...comment.toObject(),
-        hasLiked: comment.likes.some(id => id.toString() === req.user.id),
-        hasDisliked: comment.dislikes.some(id => id.toString() === req.user.id)
+      message: 'Comment updated successfully',
+      data: {
+        comment: {
+          ...comment.toObject(),
+          hasLiked: comment.likes.some(id => id.toString() === req.user.id),
+          hasDisliked: comment.dislikes.some(id => id.toString() === req.user.id)
+        }
       }
     });
   } catch (error) {
@@ -269,8 +281,11 @@ exports.getCommentLikes = async (req, res) => {
 
     res.status(200).json({
       success: true,
-      users: comment.likes,
-      count: comment.likesCount
+      message: 'Users who liked comment retrieved successfully',
+      data: {
+        users: comment.likes,
+        count: comment.likesCount
+      }
     });
   } catch (error) {
     res.status(500).json({
@@ -295,8 +310,11 @@ exports.getCommentDislikes = async (req, res) => {
 
     res.status(200).json({
       success: true,
-      users: comment.dislikes,
-      count: comment.dislikesCount
+      message: 'Users who disliked comment retrieved successfully',
+      data: {
+        users: comment.dislikes,
+        count: comment.dislikesCount
+      }
     });
   } catch (error) {
     res.status(500).json({
@@ -350,10 +368,13 @@ exports.likeComment = async (req, res) => {
 
     res.status(200).json({
       success: true,
-      likesCount: comment.likesCount,
-      dislikesCount: comment.dislikesCount,
-      hasLiked: !hasLiked,
-      hasDisliked: false
+      message: hasLiked ? 'Comment unliked successfully' : 'Comment liked successfully',
+      data: {
+        likesCount: comment.likesCount,
+        dislikesCount: comment.dislikesCount,
+        hasLiked: !hasLiked,
+        hasDisliked: false
+      }
     });
   } catch (error) {
     res.status(500).json({
@@ -395,10 +416,13 @@ exports.dislikeComment = async (req, res) => {
 
     res.status(200).json({
       success: true,
-      likesCount: comment.likesCount,
-      dislikesCount: comment.dislikesCount,
-      hasLiked: false,
-      hasDisliked: !hasDisliked
+      message: hasDisliked ? 'Comment dislike removed' : 'Comment disliked',
+      data: {
+        likesCount: comment.likesCount,
+        dislikesCount: comment.dislikesCount,
+        hasLiked: false,
+        hasDisliked: !hasDisliked
+      }
     });
   } catch (error) {
     res.status(500).json({
@@ -446,7 +470,8 @@ exports.deleteComment = async (req, res) => {
 
     res.status(200).json({
       success: true,
-      message: 'Comment deleted successfully'
+      message: 'Comment deleted successfully',
+      data: null
     });
   } catch (error) {
     res.status(500).json({

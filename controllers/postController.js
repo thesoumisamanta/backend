@@ -84,7 +84,10 @@ exports.createPost = async (req, res) => {
 
     res.status(201).json({
       success: true,
-      post
+      message: 'Post created successfully',
+      data: {
+        post
+      }
     });
   } catch (error) {
     res.status(500).json({
@@ -143,10 +146,13 @@ exports.getFeed = async (req, res) => {
 
     res.status(200).json({
       success: true,
-      posts: formattedPosts,
-      currentPage: page,
-      totalPages: Math.ceil(total / limit),
-      totalPosts: total
+      message: 'Feed posts retrieved successfully',
+      data: {
+        posts: formattedPosts,
+        currentPage: page,
+        totalPages: Math.ceil(total / limit),
+        totalPosts: total
+      }
     });
   } catch (error) {
     res.status(500).json({
@@ -173,7 +179,10 @@ exports.getTrendingPosts = async (req, res) => {
 
     res.status(200).json({
       success: true,
-      posts: formattedPosts
+      message: 'Trending posts retrieved successfully',
+      data: {
+        posts: formattedPosts
+      }
     });
   } catch (error) {
     res.status(500).json({
@@ -208,10 +217,13 @@ exports.getUserPosts = async (req, res) => {
 
     res.status(200).json({
       success: true,
-      posts: formattedPosts,
-      currentPage: page,
-      totalPages: Math.ceil(total / limit),
-      totalPosts: total
+      message: 'User posts retrieved successfully',
+      data: {
+        posts: formattedPosts,
+        currentPage: page,
+        totalPages: Math.ceil(total / limit),
+        totalPosts: total
+      }
     });
   } catch (error) {
     res.status(500).json({
@@ -242,9 +254,12 @@ exports.getPost = async (req, res) => {
 
     res.status(200).json({
       success: true,
-      post: formattedPost,
-      hasLiked: formattedPost.hasLiked,
-      hasDisliked: formattedPost.hasDisliked
+      message: 'Post details retrieved successfully',
+      data: {
+        post: formattedPost,
+        hasLiked: formattedPost.hasLiked,
+        hasDisliked: formattedPost.hasDisliked
+      }
     });
   } catch (error) {
     res.status(500).json({
@@ -314,10 +329,13 @@ exports.likePost = async (req, res) => {
 
     res.status(200).json({
       success: true,
-      likesCount: post.likesCount,
-      dislikesCount: post.dislikesCount,
-      hasLiked: !hasLiked,
-      hasDisliked: false
+      message: hasLiked ? 'Post unliked successfully' : 'Post liked successfully',
+      data: {
+        likesCount: post.likesCount,
+        dislikesCount: post.dislikesCount,
+        hasLiked: !hasLiked,
+        hasDisliked: false
+      }
     });
   } catch (error) {
     res.status(500).json({
@@ -365,10 +383,13 @@ exports.dislikePost = async (req, res) => {
 
     res.status(200).json({
       success: true,
-      likesCount: post.likesCount,
-      dislikesCount: post.dislikesCount,
-      hasLiked: false,
-      hasDisliked: !hasDisliked
+      message: hasDisliked ? 'Dislike removed' : 'Post disliked',
+      data: {
+        likesCount: post.likesCount,
+        dislikesCount: post.dislikesCount,
+        hasLiked: false,
+        hasDisliked: !hasDisliked
+      }
     });
   } catch (error) {
     res.status(500).json({
@@ -412,7 +433,8 @@ exports.deletePost = async (req, res) => {
 
     res.status(200).json({
       success: true,
-      message: 'Post deleted successfully'
+      message: 'Post deleted successfully',
+      data: null
     });
   } catch (error) {
     res.status(500).json({
@@ -440,7 +462,9 @@ exports.sharePost = async (req, res) => {
     res.status(200).json({
       success: true,
       message: 'Post shared successfully',
-      sharesCount: post.sharesCount
+      data: {
+        sharesCount: post.sharesCount
+      }
     });
   } catch (error) {
     res.status(500).json({

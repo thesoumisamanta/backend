@@ -64,7 +64,10 @@ exports.getOrCreateChat = async (req, res) => {
 
     res.status(200).json({
       success: true,
-      chat
+      message: 'Chat session retrieved successfully',
+      data: {
+        chat
+      }
     });
   } catch (error) {
     res.status(500).json({
@@ -89,7 +92,10 @@ exports.getChats = async (req, res) => {
 
     res.status(200).json({
       success: true,
-      chats
+      message: 'Chats list retrieved successfully',
+      data: {
+        chats
+      }
     });
   } catch (error) {
     res.status(500).json({
@@ -185,17 +191,17 @@ exports.sendMessage = async (req, res) => {
         );
       }
     } catch (notificationError) {
-      // Log the error but don't fail the request
       console.error('Failed to send notification:', notificationError.message);
-      // Optionally: You could store failed notifications for retry later
     }
 
     res.status(201).json({
       success: true,
-      message
+      message: 'Message sent successfully',
+      data: {
+        message
+      }
     });
   } catch (error) {
-    // Only catch database/validation errors
     console.error('Error sending message:', error);
     res.status(500).json({
       success: false,
@@ -239,9 +245,12 @@ exports.getMessages = async (req, res) => {
 
     res.status(200).json({
       success: true,
-      messages: messages.reverse(),
-      currentPage: page,
-      totalPages: Math.ceil(total / limit)
+      message: 'Messages retrieved successfully',
+      data: {
+        messages: messages.reverse(),
+        currentPage: page,
+        totalPages: Math.ceil(total / limit)
+      }
     });
   } catch (error) {
     res.status(500).json({
@@ -284,7 +293,8 @@ exports.markAsRead = async (req, res) => {
 
     res.status(200).json({
       success: true,
-      message: 'Messages marked as read'
+      message: 'Messages marked as read',
+      data: null
     });
   } catch (error) {
     res.status(500).json({

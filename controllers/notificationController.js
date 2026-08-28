@@ -27,10 +27,13 @@ exports.getNotifications = async (req, res) => {
 
     res.status(200).json({
       success: true,
-      notifications,
-      unreadCount,
-      currentPage: page,
-      totalPages: Math.ceil(total / limit)
+      message: 'Notifications retrieved successfully',
+      data: {
+        notifications,
+        unreadCount,
+        currentPage: page,
+        totalPages: Math.ceil(total / limit)
+      }
     });
   } catch (error) {
     res.status(500).json({
@@ -64,7 +67,8 @@ exports.markAsRead = async (req, res) => {
 
     res.status(200).json({
       success: true,
-      message: 'Notification marked as read'
+      message: 'Notification marked as read',
+      data: null
     });
   } catch (error) {
     res.status(500).json({
@@ -84,7 +88,8 @@ exports.markAllAsRead = async (req, res) => {
 
     res.status(200).json({
       success: true,
-      message: 'All notifications marked as read'
+      message: 'All notifications marked as read',
+      data: null
     });
   } catch (error) {
     res.status(500).json({
@@ -117,7 +122,8 @@ exports.deleteNotification = async (req, res) => {
 
     res.status(200).json({
       success: true,
-      message: 'Notification deleted successfully'
+      message: 'Notification deleted successfully',
+      data: null
     });
   } catch (error) {
     res.status(500).json({

@@ -43,7 +43,10 @@ exports.createStory = async (req, res) => {
 
     res.status(201).json({
       success: true,
-      story
+      message: 'Story created successfully',
+      data: {
+        story
+      }
     });
   } catch (error) {
     res.status(500).json({
@@ -92,7 +95,10 @@ exports.getFollowingStories = async (req, res) => {
 
     res.status(200).json({
       success: true,
-      stories: result
+      message: 'Following stories retrieved successfully',
+      data: {
+        stories: result
+      }
     });
   } catch (error) {
     res.status(500).json({
@@ -114,7 +120,10 @@ exports.getUserStories = async (req, res) => {
 
     res.status(200).json({
       success: true,
-      stories
+      message: 'User stories retrieved successfully',
+      data: {
+        stories
+      }
     });
   } catch (error) {
     res.status(500).json({
@@ -149,7 +158,8 @@ exports.viewStory = async (req, res) => {
 
     res.status(200).json({
       success: true,
-      message: 'Story viewed'
+      message: 'Story viewed',
+      data: null
     });
   } catch (error) {
     res.status(500).json({
@@ -184,7 +194,8 @@ exports.deleteStory = async (req, res) => {
 
     res.status(200).json({
       success: true,
-      message: 'Story deleted successfully'
+      message: 'Story deleted successfully',
+      data: null
     });
   } catch (error) {
     res.status(500).json({
@@ -216,7 +227,10 @@ exports.getStoryViewers = async (req, res) => {
 
     res.status(200).json({
       success: true,
-      viewers: story.viewers
+      message: 'Story viewers retrieved successfully',
+      data: {
+        viewers: story.viewers
+      }
     });
   } catch (error) {
     res.status(500).json({

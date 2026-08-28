@@ -88,7 +88,8 @@ exports.register = async (req, res, next) => {
 
       return res.status(200).json({
         success: true,
-        message: 'Registration successful! OTP code sent to your email address.'
+        message: 'Registration successful! OTP code sent to your email address.',
+        data: null
       });
     }
 
@@ -115,7 +116,8 @@ exports.register = async (req, res, next) => {
 
     res.status(201).json({
       success: true,
-      message: 'Registration successful! OTP code sent to your email address.'
+      message: 'Registration successful! OTP code sent to your email address.',
+      data: null
     });
   } catch (error) {
     res.status(500).json({
@@ -157,7 +159,8 @@ exports.verifyEmailOTP = async (req, res) => {
 
     res.status(200).json({
       success: true,
-      message: 'OTP verified successfully'
+      message: 'OTP verified successfully',
+      data: null
     });
   } catch (error) {
     res.status(500).json({
@@ -211,7 +214,7 @@ exports.resendEmailOTP = async (req, res) => {
     res.status(200).json({
       success: true,
       message: 'Verification OTP resent to your email address',
-      otp: process.env.NODE_ENV !== 'production' ? otp : undefined
+      data: process.env.NODE_ENV !== 'production' ? { otp } : null
     });
   } catch (error) {
     res.status(500).json({
@@ -233,17 +236,16 @@ exports.login = async (req, res, next) => {
       });
     }
 
-    const user = await User.findOne({
-      $or: [
-        { email: emailOrUsername.toLowerCase().trim() },
-        { username: emailOrUsername.trim() }
-      ]
-    }).select('+password');
+    const query = emailOrUsername.includes('@')
+      ? { email: emailOrUsername.toLowerCase().trim() }
+      : { username: emailOrUsername.trim() };
+
+    const user = await User.findOne(query).select('+password');
 
     if (!user) {
       return res.status(401).json({
         success: false,
-        message: 'Invalid credentials'
+        message: 'Invalid email/username or password'
       });
     }
 
@@ -252,16 +254,16 @@ exports.login = async (req, res, next) => {
     if (!isPasswordMatched) {
       return res.status(401).json({
         success: false,
-        message: 'Invalid credentials'
+        message: 'Invalid email/username or password'
       });
     }
 
     // Check if email is verified
     if (!user.isEmailVerified) {
-      // Generate and send a fresh verification OTP
+      // Auto-generate fresh 6-digit verification OTP
       const otp = Math.floor(100000 + Math.random() * 900000).toString();
       user.emailVerificationOTP = otp;
-      user.emailVerificationOTPExpire = new Date(Date.now() + 10 * 60 * 1000); // 10 minutes
+      user.emailVerificationOTPExpire = new Date(Date.now() + 10 * 60 * 1000);
       await user.save({ validateBeforeSave: false });
 
       await sendEmail({
@@ -273,13 +275,13 @@ exports.login = async (req, res, next) => {
 
       return res.status(403).json({
         success: false,
+        message: 'Your email address is not verified. A fresh OTP code has been sent to your email.',
         requiresVerification: true,
-        email: user.email,
-        message: 'Email address is not verified. A new verification OTP code has been sent to your email address.'
+        email: user.email
       });
     }
 
-    sendTokens(user, 200, res);
+    await sendTokens(user, 200, res);
   } catch (error) {
     res.status(500).json({
       success: false,
@@ -288,7 +290,7 @@ exports.login = async (req, res, next) => {
   }
 };
 
-// Refresh access token
+// Refresh token
 exports.refreshToken = async (req, res, next) => {
   try {
     const refreshToken = req.cookies.refreshToken || req.body.refreshToken || req.headers['x-refresh-token'];
@@ -296,47 +298,35 @@ exports.refreshToken = async (req, res, next) => {
     if (!refreshToken) {
       return res.status(401).json({
         success: false,
-        message: 'Refresh token not found'
+        message: 'Refresh Token is required'
       });
     }
 
-    // Verify refresh token
-    const decoded = require('jsonwebtoken').verify(
-      refreshToken,
-      process.env.JWT_REFRESH_SECRET
-    );
+    const jwt = require('jsonwebtoken');
+    const decoded = jwt.verify(refreshToken, process.env.JWT_SECRET);
 
-    // Get user with refresh token
-    const user = await User.findById(decoded.id).select('+refreshToken');
+    const user = await User.findById(decoded.id);
 
-    if (!user) {
-      return res.status(404).json({
-        success: false,
-        message: 'User not found'
-      });
-    }
-
-    // Verify if refresh token matches
-    if (user.refreshToken !== refreshToken) {
+    if (!user || user.refreshToken !== refreshToken) {
       return res.status(401).json({
         success: false,
-        message: 'Invalid refresh token'
+        message: 'Invalid Refresh Token'
       });
     }
 
-    // Generate new tokens
-    sendTokens(user, 200, res);
+    const newAccessToken = user.getAccessToken();
+
+    res.status(200).json({
+      success: true,
+      message: 'Access Token refreshed successfully',
+      data: {
+        accessToken: newAccessToken
+      }
+    });
   } catch (error) {
-    if (error.name === 'JsonWebTokenError' || error.name === 'TokenExpiredError') {
-      return res.status(401).json({
-        success: false,
-        message: 'Invalid or expired refresh token'
-      });
-    }
-
-    res.status(500).json({
+    res.status(401).json({
       success: false,
-      message: error.message
+      message: 'Invalid or expired Refresh Token'
     });
   }
 };
@@ -359,7 +349,8 @@ exports.logout = async (req, res, next) => {
       .status(200)
       .json({
         success: true,
-        message: 'Logged out successfully'
+        message: 'Logged out successfully',
+        data: null
       });
   } catch (error) {
     res.status(500).json({
@@ -376,7 +367,10 @@ exports.getMe = async (req, res, next) => {
 
     res.status(200).json({
       success: true,
-      user
+      message: 'User profile retrieved successfully',
+      data: {
+        user
+      }
     });
   } catch (error) {
     res.status(500).json({
@@ -395,7 +389,8 @@ exports.updateFCMToken = async (req, res, next) => {
 
     res.status(200).json({
       success: true,
-      message: 'FCM token updated successfully'
+      message: 'FCM token updated successfully',
+      data: null
     });
   } catch (error) {
     res.status(500).json({
@@ -443,7 +438,7 @@ exports.forgotPassword = async (req, res) => {
     res.status(200).json({
       success: true,
       message: 'Verification OTP sent to your email address',
-      otp: process.env.NODE_ENV !== 'production' ? otp : undefined
+      data: process.env.NODE_ENV !== 'production' ? { otp } : null
     });
   } catch (error) {
     res.status(500).json({
@@ -480,7 +475,8 @@ exports.verifyOTP = async (req, res) => {
 
     res.status(200).json({
       success: true,
-      message: 'OTP verified successfully'
+      message: 'OTP verified successfully',
+      data: null
     });
   } catch (error) {
     res.status(500).json({
@@ -531,7 +527,8 @@ exports.resetPassword = async (req, res) => {
 
     res.status(200).json({
       success: true,
-      message: 'Password reset successfully! Please log in with your new password.'
+      message: 'Password reset successfully! Please log in with your new password.',
+      data: null
     });
   } catch (error) {
     res.status(500).json({
