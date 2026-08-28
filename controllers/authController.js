@@ -258,11 +258,24 @@ exports.login = async (req, res, next) => {
 
     // Check if email is verified
     if (!user.isEmailVerified) {
+      // Generate and send a fresh verification OTP
+      const otp = Math.floor(100000 + Math.random() * 900000).toString();
+      user.emailVerificationOTP = otp;
+      user.emailVerificationOTPExpire = new Date(Date.now() + 10 * 60 * 1000); // 10 minutes
+      await user.save({ validateBeforeSave: false });
+
+      await sendEmail({
+        email: user.email,
+        subject: 'Travel Diary - Verify Your Email Address',
+        otp,
+        type: 'VERIFICATION'
+      });
+
       return res.status(403).json({
         success: false,
         requiresVerification: true,
         email: user.email,
-        message: 'Email address is not verified. Please verify your email first.'
+        message: 'Email address is not verified. A new verification OTP code has been sent to your email address.'
       });
     }
 
