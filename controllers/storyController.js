@@ -20,14 +20,11 @@ exports.createStory = async (req, res) => {
     }
 
     let mediaData;
-    if (req.file.mimetype.startsWith('image/')) {
-      const result = await uploadImage(req.file.buffer, 'travel-diary/stories');
-      mediaData = {
-        public_id: result.public_id,
-        url: result.url,
-        type: 'image'
-      };
-    } else if (req.file.mimetype.startsWith('video/')) {
+    const mime = (req.file.mimetype || '').toLowerCase();
+    const name = (req.file.originalname || '').toLowerCase();
+    const isVideo = mime.startsWith('video/') || /\.(mp4|mov|avi|mkv|webm|3gp|flv|wmv|m4v)$/i.test(name);
+
+    if (isVideo) {
       const result = await uploadVideo(req.file.buffer, 'travel-diary/stories');
       mediaData = {
         public_id: result.public_id,
@@ -35,6 +32,13 @@ exports.createStory = async (req, res) => {
         type: 'video',
         thumbnail: result.thumbnail,
         duration: result.duration
+      };
+    } else {
+      const result = await uploadImage(req.file.buffer, 'travel-diary/stories');
+      mediaData = {
+        public_id: result.public_id,
+        url: result.url,
+        type: 'image'
       };
     }
 

@@ -17,18 +17,19 @@ exports.createPost = async (req, res) => {
     }
 
     const mediaArray = [];
+    let hasVideo = false;
+
+    const isVideoFile = (file) => {
+      const mime = (file.mimetype || '').toLowerCase();
+      const name = (file.originalname || '').toLowerCase();
+      return mime.startsWith('video/') || /\.(mp4|mov|avi|mkv|webm|3gp|flv|wmv|m4v)$/i.test(name);
+    };
 
     // Upload all media files
     for (const file of req.files) {
       let result;
-      if (file.mimetype.startsWith('image/')) {
-        result = await uploadImage(file.buffer, 'travel-diary/posts');
-        mediaArray.push({
-          public_id: result.public_id,
-          url: result.url,
-          type: 'image'
-        });
-      } else if (file.mimetype.startsWith('video/')) {
+      if (isVideoFile(file)) {
+        hasVideo = true;
         result = await uploadVideo(file.buffer, 'travel-diary/posts');
         mediaArray.push({
           public_id: result.public_id,
@@ -37,7 +38,22 @@ exports.createPost = async (req, res) => {
           thumbnail: result.thumbnail,
           duration: result.duration
         });
+      } else {
+        result = await uploadImage(file.buffer, 'travel-diary/posts');
+        mediaArray.push({
+          public_id: result.public_id,
+          url: result.url,
+          type: 'image'
+        });
       }
+    }
+
+    // Auto-detect postType from uploaded media (backend detection)
+    let finalPostType = 'photo';
+    if (hasVideo) {
+      finalPostType = req.body.postType === 'short' ? 'short' : 'video';
+    } else {
+      finalPostType = 'photo';
     }
 
     let locationString = '';
@@ -62,7 +78,7 @@ exports.createPost = async (req, res) => {
     const post = await Post.create({
       user: req.user.id,
       caption,
-      postType: postType || 'photo',
+      postType: finalPostType,
       media: mediaArray,
       location: locationString,
       tags: tags ? (typeof tags === 'string' ? tags.split(',').map(tag => tag.trim()) : tags) : []
