@@ -12,7 +12,7 @@ const postSchema = new mongoose.Schema({
   },
   postType: {
     type: String,
-    enum: ['image', 'video', 'short'],
+    enum: ['photo', 'image', 'video', 'short'],
     required: true
   },
   media: [{

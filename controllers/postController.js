@@ -40,12 +40,22 @@ exports.createPost = async (req, res) => {
       }
     }
 
-    let locationData = location;
-    if (typeof location === 'string' && location.trim() !== '') {
-      try {
-        locationData = JSON.parse(location);
-      } catch (e) {
-        locationData = { name: location };
+    let locationString = '';
+    if (location) {
+      if (typeof location === 'string') {
+        const trimmed = location.trim();
+        if (trimmed.startsWith('{')) {
+          try {
+            const parsed = JSON.parse(trimmed);
+            locationString = parsed.name || parsed.address || trimmed;
+          } catch (e) {
+            locationString = trimmed;
+          }
+        } else {
+          locationString = trimmed;
+        }
+      } else if (typeof location === 'object') {
+        locationString = location.name || location.address || JSON.stringify(location);
       }
     }
 
@@ -54,7 +64,7 @@ exports.createPost = async (req, res) => {
       caption,
       postType: postType || 'photo',
       media: mediaArray,
-      location: locationData,
+      location: locationString,
       tags: tags ? (typeof tags === 'string' ? tags.split(',').map(tag => tag.trim()) : tags) : []
     });
 
@@ -131,8 +141,8 @@ exports.getFeed = async (req, res) => {
     const user = await User.findById(req.user.id);
     const followingIds = (user && user.following) ? user.following.map(id => id.toString()) : [];
     
-    // Include user's own posts and posts from followed users
-    const filter = { user: { $in: [...followingIds, req.user._id.toString()] } };
+    // Include only posts from followed users (excluding own posts)
+    const filter = { user: { $in: followingIds } };
 
     const posts = await Post.find(filter)
       .populate('user', 'username fullName profilePicture accountType isVerified')
