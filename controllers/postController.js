@@ -7,7 +7,7 @@ const { sendNotification, sendMulticastNotification } = require('../config/fireb
 // Create post
 exports.createPost = async (req, res) => {
   try {
-    const { caption, postType, location, tags } = req.body;
+    const { caption, location, tags } = req.body;
 
     if (!req.files || req.files.length === 0) {
       return res.status(400).json({
@@ -48,13 +48,8 @@ exports.createPost = async (req, res) => {
       }
     }
 
-    // Auto-detect postType from uploaded media (backend detection)
-    let finalPostType = 'photo';
-    if (hasVideo) {
-      finalPostType = req.body.postType === 'short' ? 'short' : 'video';
-    } else {
-      finalPostType = 'photo';
-    }
+    // Auto-detect postType 100% in backend (photo or video) based on file
+    const finalPostType = hasVideo ? 'video' : 'photo';
 
     let locationString = '';
     if (location) {
