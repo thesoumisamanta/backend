@@ -43,8 +43,7 @@ const storySchema = new mongoose.Schema({
   },
   expiresAt: {
     type: Date,
-    required: true,
-    index: { expires: 0 } // TTL index - MongoDB will automatically delete after expiration
+    required: true
   },
   createdAt: {
     type: Date,

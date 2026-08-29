@@ -13,7 +13,7 @@ const messageSchema = new mongoose.Schema({
   },
   messageType: {
     type: String,
-    enum: ['text', 'image', 'video', 'post'],
+    enum: ['text', 'image', 'video', 'post', 'story_reply'],
     default: 'text'
   },
   text: {
@@ -28,6 +28,10 @@ const messageSchema = new mongoose.Schema({
   sharedPost: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'Post'
+  },
+  sharedStory: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Story'
   },
   readBy: [{
     user: {

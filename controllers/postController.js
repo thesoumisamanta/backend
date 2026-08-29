@@ -483,3 +483,46 @@ exports.sharePost = async (req, res) => {
     });
   }
 };
+
+// Get Shorts / Reels feed (vertical full-screen video feed)
+exports.getShortsFeed = async (req, res) => {
+  try {
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 10;
+    const skip = (page - 1) * limit;
+
+    // Filter posts that are video/short types or have video media
+    const filter = {
+      $or: [
+        { postType: { $in: ['short', 'video'] } },
+        { 'media.type': 'video' }
+      ]
+    };
+
+    const posts = await Post.find(filter)
+      .populate('user', 'username fullName profilePicture accountType isVerified')
+      .sort({ createdAt: -1 })
+      .skip(skip)
+      .limit(limit);
+
+    const total = await Post.countDocuments(filter);
+
+    const formattedPosts = posts.map(post => formatPost(post, req.user._id));
+
+    res.status(200).json({
+      success: true,
+      message: 'Shorts feed retrieved successfully',
+      data: {
+        posts: formattedPosts,
+        currentPage: page,
+        totalPages: Math.ceil(total / limit),
+        totalPosts: total
+      }
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: error.message
+    });
+  }
+};

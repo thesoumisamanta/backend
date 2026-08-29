@@ -9,13 +9,15 @@ const {
   likePost,
   dislikePost,
   deletePost,
-  sharePost
+  sharePost,
+  getShortsFeed
 } = require('../../controllers/postController');
 const { isAuthenticated } = require('../../middleware/auth');
 const upload = require('../../middleware/multer');
 
 router.post('/', isAuthenticated, upload.array('media', 10), createPost);
 router.get('/feed', isAuthenticated, getFeed);
+router.get('/shorts', isAuthenticated, getShortsFeed);
 router.get('/trending', isAuthenticated, getTrendingPosts);
 router.get('/user/:userId', isAuthenticated, getUserPosts);
 router.get('/:id', isAuthenticated, getPost);
