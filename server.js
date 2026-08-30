@@ -36,11 +36,17 @@ app.use('/api/*', (req, res) => {
 // Error handler middleware (must be last)
 app.use(errorHandler);
 
+const http = require('http');
+const { initSocket } = require('./config/socket');
+
 const PORT = process.env.PORT || 5000;
 
 const server = app.listen(PORT, '0.0.0.0', () => {
   console.log(`Server running on port ${PORT} on all interfaces (Strict API v1): http://localhost:${PORT}/api/v1`);
 });
+
+// Initialize Socket.io
+initSocket(server);
 
 // Handle unhandled promise rejections
 process.on('unhandledRejection', (err) => {

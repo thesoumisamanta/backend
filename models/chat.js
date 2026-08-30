@@ -19,6 +19,15 @@ const chatSchema = new mongoose.Schema({
     of: Number,
     default: {}
   },
+  status: {
+    type: String,
+    enum: ['accepted', 'pending', 'declined'],
+    default: 'accepted'
+  },
+  requestedBy: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'User'
+  },
   createdAt: {
     type: Date,
     default: Date.now
