@@ -42,10 +42,13 @@ exports.createStory = async (req, res) => {
       };
     }
 
+    const expiresAt = new Date(Date.now() + 24 * 60 * 60 * 1000); // 24 hours from creation
+
     const story = await Story.create({
       user: req.user.id,
       media: mediaData,
-      caption
+      caption,
+      expiresAt
     });
 
     await story.populate('user', 'username fullName profilePicture accountType isVerified');

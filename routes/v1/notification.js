@@ -9,8 +9,8 @@ const {
 const { isAuthenticated } = require('../../middleware/auth');
 
 router.get('/', isAuthenticated, getNotifications);
-router.put('/:id/read', isAuthenticated, markAsRead);
 router.put('/read-all', isAuthenticated, markAllAsRead);
+router.put('/:id/read', isAuthenticated, markAsRead);
 router.delete('/:id', isAuthenticated, deleteNotification);
 
 module.exports = router;

@@ -1,6 +1,9 @@
 const { Server } = require('socket.io');
 const jwt = require('jsonwebtoken');
 const User = require('../models/user.js');
+const Chat = require('../models/chat.js');
+const Message = require('../models/message.js');
+const { sendNotification } = require('./firebase.js');
 
 let io;
 // Map to track connected users: userId -> Set of socketIds
@@ -52,18 +55,187 @@ const initSocket = (server) => {
 
     // Join specific chat room
     socket.on('join_chat', (chatId) => {
-      socket.join(chatId);
+      if (chatId) {
+        socket.join(chatId.toString());
+      }
     });
 
     // Leave specific chat room
     socket.on('leave_chat', (chatId) => {
-      socket.leave(chatId);
+      if (chatId) {
+        socket.leave(chatId.toString());
+      }
+    });
+
+    // Send Message Event via WebSockets
+    socket.on('send_message', async (data, ackCallback) => {
+      try {
+        const { chatId, text, sharedPostId, sharedStoryId } = data || {};
+
+        if (!chatId || (!text && !sharedPostId && !sharedStoryId)) {
+          if (typeof ackCallback === 'function') {
+            return ackCallback({ success: false, message: 'Invalid parameters' });
+          }
+          return;
+        }
+
+        const chat = await Chat.findById(chatId);
+        if (!chat) {
+          if (typeof ackCallback === 'function') {
+            return ackCallback({ success: false, message: 'Chat not found' });
+          }
+          return;
+        }
+
+        const isParticipant = chat.participants.map(p => p.toString()).includes(userId);
+        if (!isParticipant) {
+          if (typeof ackCallback === 'function') {
+            return ackCallback({ success: false, message: 'Not authorized for this chat' });
+          }
+          return;
+        }
+
+        const messageData = {
+          chat: chatId,
+          sender: userId,
+          messageType: 'text',
+          text
+        };
+
+        if (sharedPostId) {
+          messageData.sharedPost = sharedPostId;
+          messageData.messageType = 'post';
+        }
+        if (sharedStoryId) {
+          messageData.sharedStory = sharedStoryId;
+          messageData.messageType = 'story_reply';
+        }
+
+        const message = await Message.create(messageData);
+        await message.populate('sender', 'username fullName profilePicture');
+        if (message.sharedPost) await message.populate('sharedPost');
+        if (message.sharedStory) await message.populate('sharedStory');
+
+        const otherUserId = chat.participants.find(
+          id => id.toString() !== userId
+        ).toString();
+
+        chat.lastMessage = message._id;
+        chat.lastMessageTime = message.createdAt;
+
+        const unreadCount = chat.unreadCount.get(otherUserId) || 0;
+        chat.unreadCount.set(otherUserId, unreadCount + 1);
+
+        await chat.save();
+
+        const payload = { message, chatId };
+
+        // Emit to chat room & recipient user
+        io.to(chatId.toString()).emit('receive_message', payload);
+        emitToUser(otherUserId, 'receive_message', payload);
+
+        // Acknowledge sender socket
+        if (typeof ackCallback === 'function') {
+          ackCallback({ success: true, message: 'Message sent successfully', data: { message } });
+        }
+
+        // Trigger push notification if recipient is offline
+        try {
+          const otherUser = await User.findById(otherUserId);
+          if (otherUser && otherUser.fcmToken) {
+            await sendNotification(
+              otherUser.fcmToken,
+              `${socket.user.username}`,
+              text || 'Sent a message',
+              { type: 'message', chatId: chat._id.toString() }
+            );
+          }
+        } catch (notifErr) {
+          console.error('Push notification failed:', notifErr.message);
+        }
+      } catch (error) {
+        console.error('Socket send_message error:', error);
+        if (typeof ackCallback === 'function') {
+          ackCallback({ success: false, message: error.message });
+        }
+      }
+    });
+
+    // Mark Messages as Read Event via WebSockets
+    socket.on('mark_read', async ({ chatId }) => {
+      try {
+        if (!chatId) return;
+
+        const chat = await Chat.findById(chatId);
+        if (!chat) return;
+
+        chat.unreadCount.set(userId, 0);
+        await chat.save();
+
+        await Message.updateMany(
+          { chat: chatId, sender: { $ne: userId }, isRead: false },
+          { $set: { isRead: true }, $push: { readBy: { user: userId } } }
+        );
+
+        const otherUserId = chat.participants.find(id => id.toString() !== userId).toString();
+        
+        io.to(chatId.toString()).emit('messages_read', { chatId, readBy: userId });
+        emitToUser(otherUserId, 'messages_read', { chatId, readBy: userId });
+      } catch (err) {
+        console.error('Socket mark_read error:', err.message);
+      }
+    });
+
+    // React to Message Event via WebSockets
+    socket.on('react_message', async ({ messageId, emoji }) => {
+      try {
+        if (!messageId || !emoji) return;
+        const message = await Message.findById(messageId);
+        if (!message) return;
+
+        const existingIndex = message.reactions.findIndex(r => r.user.toString() === userId);
+        if (existingIndex > -1) {
+          if (message.reactions[existingIndex].emoji === emoji) {
+            message.reactions.splice(existingIndex, 1);
+          } else {
+            message.reactions[existingIndex].emoji = emoji;
+          }
+        } else {
+          message.reactions.push({ user: userId, emoji });
+        }
+
+        await message.save();
+        await message.populate('reactions.user', 'username fullName profilePicture');
+
+        const payload = { messageId: message._id, chatId: message.chat, reactions: message.reactions };
+        io.to(message.chat.toString()).emit('message_reacted', payload);
+      } catch (err) {
+        console.error('Socket react_message error:', err.message);
+      }
+    });
+
+    // Delete / Unsend Message Event via WebSockets
+    socket.on('delete_message', async ({ messageId }) => {
+      try {
+        if (!messageId) return;
+        const message = await Message.findById(messageId);
+        if (!message || message.sender.toString() !== userId) return;
+
+        message.isDeleted = true;
+        message.text = 'This message was unsent';
+        await message.save();
+
+        const payload = { messageId: message._id, chatId: message.chat };
+        io.to(message.chat.toString()).emit('message_deleted', payload);
+      } catch (err) {
+        console.error('Socket delete_message error:', err.message);
+      }
     });
 
     // Typing Indicators
     socket.on('typing', ({ chatId, recipientId }) => {
       if (chatId) {
-        socket.to(chatId).emit('user_typing', { chatId, userId });
+        socket.to(chatId.toString()).emit('user_typing', { chatId, userId });
       } else if (recipientId) {
         emitToUser(recipientId, 'user_typing', { userId });
       }
@@ -71,7 +243,7 @@ const initSocket = (server) => {
 
     socket.on('stop_typing', ({ chatId, recipientId }) => {
       if (chatId) {
-        socket.to(chatId).emit('user_stop_typing', { chatId, userId });
+        socket.to(chatId.toString()).emit('user_stop_typing', { chatId, userId });
       } else if (recipientId) {
         emitToUser(recipientId, 'user_stop_typing', { userId });
       }
@@ -110,7 +282,7 @@ const emitToUser = (userId, event, data) => {
 // Utility to emit socket event to a chat room
 const emitToRoom = (roomId, event, data) => {
   if (!io) return;
-  io.to(roomId).emit(event, data);
+  io.to(roomId.toString()).emit(event, data);
 };
 
 const getIO = () => {
