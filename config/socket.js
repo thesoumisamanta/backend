@@ -1,4 +1,6 @@
 const { Server } = require('socket.io');
+const { createAdapter } = require('@socket.io/redis-adapter');
+const Redis = require('ioredis');
 const jwt = require('jsonwebtoken');
 const User = require('../models/user.js');
 const Chat = require('../models/chat.js');
@@ -6,7 +8,7 @@ const Message = require('../models/message.js');
 const { sendNotification } = require('./firebase.js');
 
 let io;
-// Map to track connected users: userId -> Set of socketIds
+// Map to track connected users on this node: userId -> Set of socketIds
 const userSockets = new Map();
 
 const initSocket = (server) => {
@@ -16,6 +18,31 @@ const initSocket = (server) => {
       methods: ['GET', 'POST']
     }
   });
+
+  // Setup Redis Adapter for multi-instance / cluster horizontal scaling
+  // if (process.env.REDIS_URL || process.env.REDIS_HOST) {
+  //   try {
+  //     const redisOptions = process.env.REDIS_URL || {
+  //       host: process.env.REDIS_HOST || '127.0.0.1',
+  //       port: parseInt(process.env.REDIS_PORT) || 6379,
+  //       password: process.env.REDIS_PASSWORD || undefined,
+  //       retryStrategy: (times) => Math.min(times * 100, 3000)
+  //     };
+
+  //     const pubClient = new Redis(redisOptions);
+  //     const subClient = pubClient.duplicate();
+
+  //     pubClient.on('error', (err) => console.warn('Redis Pub Client Error:', err.message));
+  //     subClient.on('error', (err) => console.warn('Redis Sub Client Error:', err.message));
+
+  //     io.adapter(createAdapter(pubClient, subClient));
+  //     console.log('🚀 Socket.io Redis Adapter connected for multi-node horizontal scaling');
+  //   } catch (redisErr) {
+  //     console.warn('⚠️ Could not initialize Redis Adapter, falling back to In-Memory Adapter:', redisErr.message);
+  //   }
+  // } else {
+  //   console.log('ℹ️ Running Socket.io with In-Memory Adapter (Add REDIS_HOST in .env for multi-server scaling)');
+  // }
 
   // Socket Authentication Middleware
   io.use(async (socket, next) => {
@@ -50,8 +77,8 @@ const initSocket = (server) => {
     // Update user online status in database
     await User.findByIdAndUpdate(userId, { isOnline: true, lastSeen: new Date() });
 
-    // Broadcast user online status
-    socket.broadcast.emit('user_online', { userId, lastSeen: new Date() });
+    // Broadcast user online status across all nodes
+    io.emit('user_online', { userId, lastSeen: new Date() });
 
     // Join specific chat room
     socket.on('join_chat', (chatId) => {
@@ -130,7 +157,7 @@ const initSocket = (server) => {
 
         const payload = { message, chatId };
 
-        // Emit to chat room & recipient user
+        // Broadcast to chat room & recipient across cluster nodes via adapter
         io.to(chatId.toString()).emit('receive_message', payload);
         emitToUser(otherUserId, 'receive_message', payload);
 
@@ -139,7 +166,7 @@ const initSocket = (server) => {
           ackCallback({ success: true, message: 'Message sent successfully', data: { message } });
         }
 
-        // Trigger push notification if recipient is offline
+        // Trigger FCM push notification if recipient is offline
         try {
           const otherUser = await User.findById(otherUserId);
           if (otherUser && otherUser.fcmToken) {
@@ -258,7 +285,7 @@ const initSocket = (server) => {
           userSockets.delete(userId);
           const now = new Date();
           await User.findByIdAndUpdate(userId, { isOnline: false, lastSeen: now });
-          socket.broadcast.emit('user_offline', { userId, lastSeen: now });
+          io.emit('user_offline', { userId, lastSeen: now });
         }
       }
     });
@@ -267,7 +294,7 @@ const initSocket = (server) => {
   return io;
 };
 
-// Utility to emit socket event to a specific user
+// Utility to emit socket event to a specific user (across adapter nodes)
 const emitToUser = (userId, event, data) => {
   if (!io) return;
   const targetId = userId.toString();
@@ -276,6 +303,9 @@ const emitToUser = (userId, event, data) => {
     sockets.forEach(socketId => {
       io.to(socketId).emit(event, data);
     });
+  } else {
+    // If not on local process node, emit to targetId room
+    io.to(targetId).emit(event, data);
   }
 };
 
