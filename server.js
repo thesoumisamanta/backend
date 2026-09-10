@@ -22,6 +22,11 @@ app.use(cors({
   credentials: true
 }));
 
+// Public Legal Pages & Endpoints
+const { getTermsAndConditions, getPrivacyPolicy } = require('./controllers/legalController');
+app.get('/terms', getTermsAndConditions);
+app.get('/privacy', getPrivacyPolicy);
+
 // Mount strict versioned API routes (/api/v1/...)
 app.use('/api', apiRoutes);
 
