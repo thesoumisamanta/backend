@@ -122,7 +122,7 @@ contact us at:
 
 Vagabond / Travel Diary Legal & Support Team
 Email: samantasoumi10@gmail.com
-Website: https://traveldiary.clipboux.online`;
+Website: https://vagabond.clipboux.online`;
 
 const PRIVACY_POLICY_TEXT = `PRIVACY POLICY - VAGABOND (TRAVEL DIARY)
 Effective Date: September 10, 2026
@@ -268,7 +268,7 @@ our data handling practices, please contact us at:
 
 Vagabond / Travel Diary Support Team
 Email: samantasoumi10@gmail.com
-Website: https://traveldiary.clipboux.online`;
+Website: https://vagabond.clipboux.online`;
 
 // HTML Page Renderer Helper
 const renderHtmlPage = (title, lastUpdated, contentHtml) => {
@@ -545,7 +545,7 @@ exports.getTermsAndConditions = async (req, res) => {
           <p>
             <strong>Vagabond / Travel Diary Legal & Support Team</strong><br>
             Email: <a href="mailto:samantasoumi10@gmail.com">samantasoumi10@gmail.com</a><br>
-            Website: <a href="https://traveldiary.clipboux.online" target="_blank" rel="noopener noreferrer">https://traveldiary.clipboux.online</a>
+            Website: <a href="https://vagabond.clipboux.online" target="_blank" rel="noopener noreferrer">https://vagabond.clipboux.online</a>
           </p>
         </section>
       `;
@@ -644,7 +644,7 @@ exports.getTermsAndConditions = async (req, res) => {
             description: "If you have any questions or concerns regarding these Terms of Service, please contact us at:",
             team: "Vagabond / Travel Diary Legal & Support Team",
             email: "samantasoumi10@gmail.com",
-            website: "https://traveldiary.clipboux.online"
+            website: "https://vagabond.clipboux.online"
           }
         },
         sections: [
@@ -732,7 +732,7 @@ exports.getTermsAndConditions = async (req, res) => {
             sectionNumber: 10,
             title: "CONTACT INFORMATION",
             items: [
-              "If you have any questions or concerns regarding these Terms of Service, please contact us at: Vagabond / Travel Diary Legal & Support Team, Email: samantasoumi10@gmail.com, Website: https://traveldiary.clipboux.online"
+              "If you have any questions or concerns regarding these Terms of Service, please contact us at: Vagabond / Travel Diary Legal & Support Team, Email: samantasoumi10@gmail.com, Website: https://vagabond.clipboux.online"
             ]
           }
         ]
@@ -863,7 +863,7 @@ exports.getPrivacyPolicy = async (req, res) => {
           <p>
             <strong>Vagabond / Travel Diary Support Team</strong><br>
             Email: <a href="mailto:samantasoumi10@gmail.com">samantasoumi10@gmail.com</a><br>
-            Website: <a href="https://traveldiary.clipboux.online" target="_blank" rel="noopener noreferrer">https://traveldiary.clipboux.online</a>
+            Website: <a href="https://vagabond.clipboux.online" target="_blank" rel="noopener noreferrer">https://vagabond.clipboux.online</a>
           </p>
         </section>
       `;
@@ -969,7 +969,7 @@ exports.getPrivacyPolicy = async (req, res) => {
           contactUs: {
             team: "Vagabond / Travel Diary Support Team",
             email: "samantasoumi10@gmail.com",
-            website: "https://traveldiary.clipboux.online"
+            website: "https://vagabond.clipboux.online"
           }
         },
         sections: [
@@ -1083,7 +1083,7 @@ exports.getPrivacyPolicy = async (req, res) => {
             sectionNumber: 10,
             title: "CONTACT US",
             items: [
-              "If you have any questions, concerns, or requests regarding this Privacy Policy or our data handling practices, please contact us at: Vagabond / Travel Diary Support Team, Email: samantasoumi10@gmail.com, Website: https://traveldiary.clipboux.online"
+              "If you have any questions, concerns, or requests regarding this Privacy Policy or our data handling practices, please contact us at: Vagabond / Travel Diary Support Team, Email: samantasoumi10@gmail.com, Website: https://vagabond.clipboux.online"
             ]
           }
         ]
@@ -1108,7 +1108,7 @@ exports.getAppInfo = async (req, res) => {
         brandName: "Vagabond",
         version: "1.0.0",
         supportEmail: "samantasoumi10@gmail.com",
-        website: "https://traveldiary.clipboux.online"
+        website: "https://vagabond.clipboux.online"
       }
     });
   } catch (error) {
