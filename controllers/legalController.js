@@ -56,7 +56,7 @@ To maintain a safe and respectful community for all users:
     flag, filter, modify, or remove any User Content that violates these Terms or 
     community guidelines.
 3.2 Reporting Mechanisms: Users can report objectionable content or abusive users 
-    directly through the in-app reporting tools or by emailing support@clipboux.online.
+    directly through the in-app reporting tools or by emailing samantasoumi10@gmail.com.
 3.3 Action on Reports: Reported content or accounts will be reviewed promptly. 
     Violating content will be removed within 24 hours of confirmation.
 3.4 Account Suspension & Termination: We reserve the right to suspend, disable, or 
@@ -121,7 +121,7 @@ If you have any questions or concerns regarding these Terms of Service, please
 contact us at:
 
 Vagabond / Travel Diary Legal & Support Team
-Email: support@clipboux.online
+Email: samantasoumi10@gmail.com
 Website: https://traveldiary.clipboux.online`;
 
 const PRIVACY_POLICY_TEXT = `PRIVACY POLICY - VAGABOND (TRAVEL DIARY)
@@ -232,7 +232,7 @@ In compliance with Google Play Developer Policies and global privacy regulations
      uploaded media, comments, and authentication credentials will be permanently 
      purged from our active databases.
    - Web Deletion Request: Users may also request complete account deletion by contacting 
-     our support team at support@clipboux.online.
+     our support team at samantasoumi10@gmail.com.
 
 --------------------------------------------------------------------------------
 7. CHILDREN'S PRIVACY
@@ -241,7 +241,7 @@ The Application is not intended for children under the age of 13 (or 16 in certa
 jurisdictions). We do not knowingly collect or solicit personal information from 
 children under 13. If we discover that a child under 13 has provided us with personal 
 data, we will delete such information from our servers immediately. If you believe 
-a child under 13 has registered an account, please contact us at support@clipboux.online.
+a child under 13 has registered an account, please contact us at samantasoumi10@gmail.com.
 
 --------------------------------------------------------------------------------
 8. YOUR PRIVACY RIGHTS & CHOICES
@@ -267,7 +267,7 @@ If you have any questions, concerns, or requests regarding this Privacy Policy o
 our data handling practices, please contact us at:
 
 Vagabond / Travel Diary Support Team
-Email: support@clipboux.online
+Email: samantasoumi10@gmail.com
 Website: https://traveldiary.clipboux.online`;
 
 // HTML Page Renderer Helper
@@ -416,7 +416,7 @@ const renderHtmlPage = (title, lastUpdated, contentHtml) => {
       ${contentHtml}
     </div>
     <div class="footer">
-      &copy; 2026 Vagabond (Travel Diary). All rights reserved. &bull; <a href="mailto:support@clipboux.online">support@clipboux.online</a>
+      &copy; 2026 Vagabond (Travel Diary). All rights reserved. &bull; <a href="mailto:samantasoumi10@gmail.com">samantasoumi10@gmail.com</a>
     </div>
   </div>
 </body>
@@ -490,7 +490,7 @@ exports.getTermsAndConditions = async (req, res) => {
           <p>To maintain a safe and respectful community for all users:</p>
           <ul>
             <li><strong>3.1 Moderation & Monitoring:</strong> We reserve the right (but have no obligation) to review, flag, filter, modify, or remove any User Content that violates these Terms or community guidelines.</li>
-            <li><strong>3.2 Reporting Mechanisms:</strong> Users can report objectionable content or abusive users directly through the in-app reporting tools or by emailing <a href="mailto:support@clipboux.online">support@clipboux.online</a>.</li>
+            <li><strong>3.2 Reporting Mechanisms:</strong> Users can report objectionable content or abusive users directly through the in-app reporting tools or by emailing <a href="mailto:samantasoumi10@gmail.com">samantasoumi10@gmail.com</a>.</li>
             <li><strong>3.3 Action on Reports:</strong> Reported content or accounts will be reviewed promptly. Violating content will be removed within 24 hours of confirmation.</li>
             <li><strong>3.4 Account Suspension & Termination:</strong> We reserve the right to suspend, disable, or permanently terminate any account found in violation of these Terms without prior notice.</li>
           </ul>
@@ -544,7 +544,7 @@ exports.getTermsAndConditions = async (req, res) => {
           <p>If you have any questions or concerns regarding these Terms of Service, please contact us at:</p>
           <p>
             <strong>Vagabond / Travel Diary Legal & Support Team</strong><br>
-            Email: <a href="mailto:support@clipboux.online">support@clipboux.online</a><br>
+            Email: <a href="mailto:samantasoumi10@gmail.com">samantasoumi10@gmail.com</a><br>
             Website: <a href="https://traveldiary.clipboux.online" target="_blank" rel="noopener noreferrer">https://traveldiary.clipboux.online</a>
           </p>
         </section>
@@ -603,7 +603,7 @@ exports.getTermsAndConditions = async (req, res) => {
             title: "3. CONTENT MODERATION, REPORTING & BLOCKING MECHANISMS",
             preamble: "To maintain a safe and respectful community for all users:",
             moderationAndMonitoring: "3.1 Moderation & Monitoring: We reserve the right (but have no obligation) to review, flag, filter, modify, or remove any User Content that violates these Terms or community guidelines.",
-            reportingMechanisms: "3.2 Reporting Mechanisms: Users can report objectionable content or abusive users directly through the in-app reporting tools or by emailing support@clipboux.online.",
+            reportingMechanisms: "3.2 Reporting Mechanisms: Users can report objectionable content or abusive users directly through the in-app reporting tools or by emailing samantasoumi10@gmail.com.",
             actionOnReports: "3.3 Action on Reports: Reported content or accounts will be reviewed promptly. Violating content will be removed within 24 hours of confirmation.",
             accountSuspension: "3.4 Account Suspension & Termination: We reserve the right to suspend, disable, or permanently terminate any account found in violation of these Terms without prior notice."
           },
@@ -643,7 +643,7 @@ exports.getTermsAndConditions = async (req, res) => {
             title: "10. CONTACT INFORMATION",
             description: "If you have any questions or concerns regarding these Terms of Service, please contact us at:",
             team: "Vagabond / Travel Diary Legal & Support Team",
-            email: "support@clipboux.online",
+            email: "samantasoumi10@gmail.com",
             website: "https://traveldiary.clipboux.online"
           }
         },
@@ -674,7 +674,7 @@ exports.getTermsAndConditions = async (req, res) => {
             preamble: "To maintain a safe and respectful community for all users:",
             items: [
               "3.1 Moderation & Monitoring: We reserve the right (but have no obligation) to review, flag, filter, modify, or remove any User Content that violates these Terms or community guidelines.",
-              "3.2 Reporting Mechanisms: Users can report objectionable content or abusive users directly through the in-app reporting tools or by emailing support@clipboux.online.",
+              "3.2 Reporting Mechanisms: Users can report objectionable content or abusive users directly through the in-app reporting tools or by emailing samantasoumi10@gmail.com.",
               "3.3 Action on Reports: Reported content or accounts will be reviewed promptly. Violating content will be removed within 24 hours of confirmation.",
               "3.4 Account Suspension & Termination: We reserve the right to suspend, disable, or permanently terminate any account found in violation of these Terms without prior notice."
             ]
@@ -732,7 +732,7 @@ exports.getTermsAndConditions = async (req, res) => {
             sectionNumber: 10,
             title: "CONTACT INFORMATION",
             items: [
-              "If you have any questions or concerns regarding these Terms of Service, please contact us at: Vagabond / Travel Diary Legal & Support Team, Email: support@clipboux.online, Website: https://traveldiary.clipboux.online"
+              "If you have any questions or concerns regarding these Terms of Service, please contact us at: Vagabond / Travel Diary Legal & Support Team, Email: samantasoumi10@gmail.com, Website: https://traveldiary.clipboux.online"
             ]
           }
         ]
@@ -833,13 +833,13 @@ exports.getPrivacyPolicy = async (req, res) => {
             <li><strong>Retention Period:</strong> We retain your personal data for as long as your account remains active or as needed to provide you with Application services.</li>
             <li><strong>In-App Account Deletion:</strong> You can permanently delete your account and associated data directly within the Application by navigating to: <em>Menu &gt; Delete Account</em> (requires password confirmation).</li>
             <li><strong>Consequences of Deletion:</strong> Upon account deletion, your personal profile, posts, uploaded media, comments, and authentication credentials will be permanently purged from our active databases.</li>
-            <li><strong>Web Deletion Request:</strong> Users may also request complete account deletion by contacting our support team at <a href="mailto:support@clipboux.online">support@clipboux.online</a>.</li>
+            <li><strong>Web Deletion Request:</strong> Users may also request complete account deletion by contacting our support team at <a href="mailto:samantasoumi10@gmail.com">samantasoumi10@gmail.com</a>.</li>
           </ul>
         </section>
 
         <section>
           <h2>7. CHILDREN'S PRIVACY</h2>
-          <p>The Application is not intended for children under the age of 13 (or 16 in certain jurisdictions). We do not knowingly collect or solicit personal information from children under 13. If we discover that a child under 13 has provided us with personal data, we will delete such information from our servers immediately. If you believe a child under 13 has registered an account, please contact us at <a href="mailto:support@clipboux.online">support@clipboux.online</a>.</p>
+          <p>The Application is not intended for children under the age of 13 (or 16 in certain jurisdictions). We do not knowingly collect or solicit personal information from children under 13. If we discover that a child under 13 has provided us with personal data, we will delete such information from our servers immediately. If you believe a child under 13 has registered an account, please contact us at <a href="mailto:samantasoumi10@gmail.com">samantasoumi10@gmail.com</a>.</p>
         </section>
 
         <section>
@@ -862,7 +862,7 @@ exports.getPrivacyPolicy = async (req, res) => {
           <p>If you have any questions, concerns, or requests regarding this Privacy Policy or our data handling practices, please contact us at:</p>
           <p>
             <strong>Vagabond / Travel Diary Support Team</strong><br>
-            Email: <a href="mailto:support@clipboux.online">support@clipboux.online</a><br>
+            Email: <a href="mailto:samantasoumi10@gmail.com">samantasoumi10@gmail.com</a><br>
             Website: <a href="https://traveldiary.clipboux.online" target="_blank" rel="noopener noreferrer">https://traveldiary.clipboux.online</a>
           </p>
         </section>
@@ -911,7 +911,7 @@ exports.getPrivacyPolicy = async (req, res) => {
             "MongoDB Cloud Atlas & Backend Servers: Used for encrypted database storage and secure API request processing."
           ],
           dataRights:
-            "Users have the right to access and rectify their profile information, disable push notifications, execute permanent account deletion directly in-app (Menu > Delete Account), or submit a deletion request to support@clipboux.online.",
+            "Users have the right to access and rectify their profile information, disable push notifications, execute permanent account deletion directly in-app (Menu > Delete Account), or submit a deletion request to samantasoumi10@gmail.com.",
 
           // --- Extended Detailed Sections (v2.0 additions) ---
           informationCollectedDetails: {
@@ -955,10 +955,10 @@ exports.getPrivacyPolicy = async (req, res) => {
             retentionPeriod: "We retain your personal data for as long as your account remains active or as needed to provide you with Application services.",
             inAppAccountDeletion: "You can permanently delete your account and associated data directly within the Application by navigating to: Menu > Delete Account (requires password confirmation).",
             consequencesOfDeletion: "Upon account deletion, your personal profile, posts, uploaded media, comments, and authentication credentials will be permanently purged from our active databases.",
-            webDeletionRequest: "Users may also request complete account deletion by contacting our support team at support@clipboux.online."
+            webDeletionRequest: "Users may also request complete account deletion by contacting our support team at samantasoumi10@gmail.com."
           },
           childrensPrivacy:
-            "The Application is not intended for children under the age of 13 (or 16 in certain jurisdictions). We do not knowingly collect or solicit personal information from children under 13. If we discover that a child under 13 has provided us with personal data, we will delete such information from our servers immediately. If you believe a child under 13 has registered an account, please contact us at support@clipboux.online.",
+            "The Application is not intended for children under the age of 13 (or 16 in certain jurisdictions). We do not knowingly collect or solicit personal information from children under 13. If we discover that a child under 13 has provided us with personal data, we will delete such information from our servers immediately. If you believe a child under 13 has registered an account, please contact us at samantasoumi10@gmail.com.",
           privacyRightsAndChoices: [
             "Access & Rectification: You can review and update your profile information at any time within the Application settings.",
             "Account Deletion: You can request or execute permanent account deletion.",
@@ -968,7 +968,7 @@ exports.getPrivacyPolicy = async (req, res) => {
             "We may update our Privacy Policy from time to time. Any changes will be posted within the Application or on our official platform with an updated \"Last Updated\" date. Your continued use of the Application after changes become effective constitutes acceptance of the revised Privacy Policy.",
           contactUs: {
             team: "Vagabond / Travel Diary Support Team",
-            email: "support@clipboux.online",
+            email: "samantasoumi10@gmail.com",
             website: "https://traveldiary.clipboux.online"
           }
         },
@@ -1052,14 +1052,14 @@ exports.getPrivacyPolicy = async (req, res) => {
               "Retention Period: We retain your personal data for as long as your account remains active or as needed to provide you with Application services.",
               "In-App Account Deletion: You can permanently delete your account and associated data directly within the Application by navigating to: Menu > Delete Account (requires password confirmation).",
               "Consequences of Deletion: Upon account deletion, your personal profile, posts, uploaded media, comments, and authentication credentials will be permanently purged from our active databases.",
-              "Web Deletion Request: Users may also request complete account deletion by contacting our support team at support@clipboux.online."
+              "Web Deletion Request: Users may also request complete account deletion by contacting our support team at samantasoumi10@gmail.com."
             ]
           },
           {
             sectionNumber: 7,
             title: "CHILDREN'S PRIVACY",
             items: [
-              "The Application is not intended for children under the age of 13 (or 16 in certain jurisdictions). We do not knowingly collect or solicit personal information from children under 13. If we discover that a child under 13 has provided us with personal data, we will delete such information from our servers immediately. If you believe a child under 13 has registered an account, please contact us at support@clipboux.online."
+              "The Application is not intended for children under the age of 13 (or 16 in certain jurisdictions). We do not knowingly collect or solicit personal information from children under 13. If we discover that a child under 13 has provided us with personal data, we will delete such information from our servers immediately. If you believe a child under 13 has registered an account, please contact us at samantasoumi10@gmail.com."
             ]
           },
           {
@@ -1083,7 +1083,7 @@ exports.getPrivacyPolicy = async (req, res) => {
             sectionNumber: 10,
             title: "CONTACT US",
             items: [
-              "If you have any questions, concerns, or requests regarding this Privacy Policy or our data handling practices, please contact us at: Vagabond / Travel Diary Support Team, Email: support@clipboux.online, Website: https://traveldiary.clipboux.online"
+              "If you have any questions, concerns, or requests regarding this Privacy Policy or our data handling practices, please contact us at: Vagabond / Travel Diary Support Team, Email: samantasoumi10@gmail.com, Website: https://traveldiary.clipboux.online"
             ]
           }
         ]
@@ -1107,7 +1107,7 @@ exports.getAppInfo = async (req, res) => {
         appName: "Travel Diary",
         brandName: "Vagabond",
         version: "1.0.0",
-        supportEmail: "support@clipboux.online",
+        supportEmail: "samantasoumi10@gmail.com",
         website: "https://traveldiary.clipboux.online"
       }
     });
