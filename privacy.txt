@@ -1,0 +1,147 @@
+================================================================================
+PRIVACY POLICY - VAGABOND (TRAVEL DIARY)
+================================================================================
+Effective Date: September 10, 2026
+Last Updated: September 10, 2026
+
+Welcome to Vagabond (also referred to as "Travel Diary", "we", "us", or "our").
+We are committed to respecting your privacy and protecting your personal data. 
+This Privacy Policy explains how we collect, use, disclose, store, and safeguard 
+your information when you use our mobile application and related services 
+(collectively, the "Application").
+
+Please read this Privacy Policy carefully. By creating an account or using the 
+Application, you consent to the data practices described herein. If you do not 
+agree with the terms of this Privacy Policy, please do not access or use the Application.
+
+--------------------------------------------------------------------------------
+1. INFORMATION WE COLLECT
+--------------------------------------------------------------------------------
+We collect several types of information from and about users of our Application:
+
+A. Personal Information You Provide Directly:
+   - Account Registration: Name, email address, username, password, profile details, 
+     and account type (Personal or Business).
+   - Profile Details: Profile picture, bio, and associated social link preferences.
+   - User Generated Content (UGC): Travel stories, posts, photos, videos, comments, 
+     likes, and optional location tags/captions attached to your uploads.
+   - Authentication & Security Data: One-Time Password (OTP) codes sent during email 
+     verification and password resets.
+   - User Communications: Messages sent via in-app chat, support inquiries, and feedback.
+
+B. Information Collected Automatically:
+   - Device & Technical Data: Device model, operating system version, app version, 
+     unique device identifiers, and network connection status.
+   - Usage Data: Interactions within the Application, screen views, features used, 
+     and time spent.
+   - Push Notification Identifiers: Firebase Cloud Messaging (FCM) tokens to deliver 
+     real-time notification updates to your device.
+
+--------------------------------------------------------------------------------
+2. DEVICE PERMISSIONS
+--------------------------------------------------------------------------------
+To provide core features of the Application, we may request access to certain 
+device features with your explicit consent:
+   - Camera: To allow you to take photos and record travel videos directly in the Application.
+   - Photo Library / Storage: To allow you to select and upload photos and videos to 
+     your posts, stories, or profile.
+   - Push Notifications: To send you real-time alerts regarding account activity, 
+     verification status, messages, and community engagement.
+
+You may grant or revoke permissions at any time through your device settings. 
+However, denying permissions may limit your ability to use certain Application features.
+
+--------------------------------------------------------------------------------
+3. HOW WE USE YOUR INFORMATION
+--------------------------------------------------------------------------------
+We use the collected information for the following legitimate purposes:
+   - To provide, maintain, and improve the core Application functions.
+   - To authenticate user accounts, verify email addresses via OTP, and manage login sessions.
+   - To host, display, and publish your travel posts, stories, and media content.
+   - To facilitate social interactions (chatting, following users, liking, and commenting).
+   - To deliver push notifications regarding account updates and community interactions.
+   - To maintain platform security, detect and prevent fraud, spam, or prohibited content.
+   - To comply with applicable legal obligations and enforce our Terms of Service.
+
+--------------------------------------------------------------------------------
+4. THIRD-PARTY SERVICES & DATA SHARING
+--------------------------------------------------------------------------------
+We do NOT sell, rent, or trade your personal data to third parties or advertisers. 
+We share information only with trusted third-party service providers that assist 
+in operating our Application, subject to strict confidentiality obligations:
+
+   - Cloudinary: Used for secure hosting, optimization, and storage of user-uploaded 
+     photos and video media.
+   - Firebase Cloud Messaging (Google LLC): Used to deliver real-time push notifications.
+   - MongoDB Cloud Atlas & Backend Servers: Used for encrypted database storage and 
+     secure API request processing.
+
+We may also disclose your information if required to do so by law, court order, or 
+governmental regulation, or if necessary to protect the rights, safety, and property 
+of Vagabond, its users, or the public.
+
+--------------------------------------------------------------------------------
+5. DATA SECURITY & STORAGE
+--------------------------------------------------------------------------------
+We implement robust technical and organizational security measures to protect your 
+personal information:
+   - Data Transmission: All communication between the Application and our servers 
+     is encrypted in transit using industry-standard HTTPS / TLS (Transport Layer Security).
+   - Data Storage: Passwords and sensitive user credentials are stored using strong 
+     cryptographic hashing. Database records are stored securely in managed environments.
+
+While we strive to use commercially acceptable means to protect your personal information, 
+no method of transmission over the Internet or electronic storage is 100% secure. 
+You are responsible for maintaining the confidentiality of your account credentials.
+
+--------------------------------------------------------------------------------
+6. DATA RETENTION & ACCOUNT DELETION POLICY
+--------------------------------------------------------------------------------
+In compliance with Google Play Developer Policies and global privacy regulations:
+
+   - Retention Period: We retain your personal data for as long as your account remains 
+     active or as needed to provide you with Application services.
+   - In-App Account Deletion: You can permanently delete your account and associated 
+     data directly within the Application by navigating to:
+     Menu > Delete Account (requires password confirmation).
+   - Consequences of Deletion: Upon account deletion, your personal profile, posts, 
+     uploaded media, comments, and authentication credentials will be permanently 
+     purged from our active databases.
+   - Web Deletion Request: Users may also request complete account deletion by contacting 
+     our support team at samantasoumi10@gmail.com.
+
+--------------------------------------------------------------------------------
+7. CHILDREN'S PRIVACY
+--------------------------------------------------------------------------------
+The Application is not intended for children under the age of 13 (or 16 in certain 
+jurisdictions). We do not knowingly collect or solicit personal information from 
+children under 13. If we discover that a child under 13 has provided us with personal 
+data, we will delete such information from our servers immediately. If you believe 
+a child under 13 has registered an account, please contact us at samantasoumi10@gmail.com.
+
+--------------------------------------------------------------------------------
+8. YOUR PRIVACY RIGHTS & CHOICES
+--------------------------------------------------------------------------------
+Depending on your jurisdiction, you have the following rights regarding your data:
+   - Access & Rectification: You can review and update your profile information at 
+     any time within the Application settings.
+   - Account Deletion: You can request or execute permanent account deletion.
+   - Push Notifications: You can disable push notifications via your device settings.
+
+--------------------------------------------------------------------------------
+9. CHANGES TO THIS PRIVACY POLICY
+--------------------------------------------------------------------------------
+We may update our Privacy Policy from time to time. Any changes will be posted within 
+the Application or on our official platform with an updated "Last Updated" date. 
+Your continued use of the Application after changes become effective constitutes 
+acceptance of the revised Privacy Policy.
+
+--------------------------------------------------------------------------------
+10. CONTACT US
+--------------------------------------------------------------------------------
+If you have any questions, concerns, or requests regarding this Privacy Policy or 
+our data handling practices, please contact us at:
+
+Vagabond / Travel Diary Support Team
+Email: samantasoumi10@gmail.com
+Website: https://traveldiary.clipboux.online
