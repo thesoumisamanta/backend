@@ -66,3 +66,27 @@ exports.authorizeAccountType = (...accountTypes) => {
     next();
   };
 };
+
+// Optional authentication: attaches user if token exists, but doesn't block unauthenticated requests
+exports.optionalAuth = async (req, res, next) => {
+  try {
+    let token = req.cookies?.accessToken;
+
+    if (!token && req.headers.authorization && req.headers.authorization.startsWith('Bearer ')) {
+      token = req.headers.authorization.split(' ')[1];
+    }
+
+    if (token) {
+      try {
+        const decoded = jwt.verify(token, process.env.JWT_ACCESS_SECRET);
+        req.user = await User.findById(decoded.id);
+      } catch (err) {
+        // Token invalid or expired, continue as guest
+        req.user = null;
+      }
+    }
+    next();
+  } catch (error) {
+    next();
+  }
+};

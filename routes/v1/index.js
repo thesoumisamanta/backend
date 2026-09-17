@@ -10,6 +10,7 @@ const chatRoutes = require('./chat');
 const mailRoutes = require('./mail');
 const notificationRoutes = require('./notification');
 const legalRoutes = require('./legal');
+const supportRoutes = require('./support');
 
 // API v1 Health Check
 router.get('/health', (req, res) => {
@@ -32,5 +33,7 @@ router.use('/chats', chatRoutes);
 router.use('/mails', mailRoutes);
 router.use('/notifications', notificationRoutes);
 router.use('/legal', legalRoutes);
+router.use('/support', supportRoutes);
+router.use('/contact', supportRoutes);
 
 module.exports = router;
