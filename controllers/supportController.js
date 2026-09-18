@@ -66,13 +66,13 @@ exports.contactSupport = async (req, res) => {
       const userEmailHtml = `
         <div style="font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; max-width: 600px; margin: 0 auto; background-color: #ffffff; border: 1px solid #e2e8f0; border-radius: 12px; overflow: hidden; color: #1e293b;">
           <div style="background: linear-gradient(135deg, #2563eb, #3b82f6); padding: 24px; text-align: center; color: white;">
-            <h1 style="margin: 0; font-size: 24px; font-weight: 700; letter-spacing: 0.5px;">Travel Diary Support</h1>
+            <h1 style="margin: 0; font-size: 24px; font-weight: 700; letter-spacing: 0.5px;">Vagabond Support</h1>
             <p style="margin: 6px 0 0; font-size: 14px; opacity: 0.9;">We have received your message</p>
           </div>
           <div style="padding: 24px;">
             <p style="font-size: 16px; line-height: 1.5; margin-top: 0;">Hi <strong>${trimmedName}</strong>,</p>
             <p style="font-size: 15px; line-height: 1.6; color: #475569;">
-              Thank you for contacting Vagabond / Travel Diary support. Your inquiry has been received and assigned to our team.
+              Thank you for contacting Vagabond support. Your inquiry has been received and assigned to our team.
             </p>
             <div style="background-color: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 16px; margin: 20px 0;">
               <p style="margin: 0 0 8px; font-size: 14px; color: #64748b;"><strong>Ticket Reference:</strong></p>
@@ -87,7 +87,7 @@ exports.contactSupport = async (req, res) => {
             </p>
             <hr style="border: none; border-top: 1px solid #e2e8f0; margin: 24px 0;" />
             <p style="font-size: 12px; color: #94a3b8; text-align: center; margin: 0;">
-              Vagabond (Travel Diary) &bull; samantasoumi10@gmail.com &bull; https://vagabond.clipboux.online
+              Vagabond &bull; samantasoumi10@gmail.com &bull; https://vagabond.clipboux.online
             </p>
           </div>
         </div>

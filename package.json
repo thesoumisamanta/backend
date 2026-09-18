@@ -1,7 +1,7 @@
 {
   "name": "backend",
   "version": "1.0.0",
-  "description": "Travel Diary backend",
+  "description": "Vagabond backend",
   "license": "ISC",
   "author": "Soumi Samanta",
   "type": "commonjs",

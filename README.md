@@ -1,4 +1,4 @@
-# Travel Diary - Backend API
+# Vagabond - Backend API
 
 A comprehensive RESTful API built with Node.js, Express, and MongoDB for a travel social media application. Features include JWT authentication with refresh tokens, real-time notifications via Firebase, media storage with Cloudinary, and complete social networking functionality.
 
@@ -27,7 +27,7 @@ A comprehensive RESTful API built with Node.js, Express, and MongoDB for a trave
 
 ## 🎯 Overview
 
-The Travel Diary backend is a production-ready Node.js API that powers a full-featured social media platform for travel enthusiasts. It handles user authentication, content management, real-time messaging, push notifications, and media storage.
+The Vagabond backend is a production-ready Node.js API that powers a full-featured social media platform for travel enthusiasts. It handles user authentication, content management, real-time messaging, push notifications, and media storage.
 
 ### Key Highlights
 

@@ -81,7 +81,7 @@ exports.register = async (req, res, next) => {
 
       await sendEmail({
         email: user.email,
-        subject: 'Travel Diary - Verify Your Email Address',
+        subject: 'Vagabond - Verify Your Email Address',
         otp,
         type: 'VERIFICATION'
       });
@@ -109,7 +109,7 @@ exports.register = async (req, res, next) => {
 
     await sendEmail({
       email: user.email,
-      subject: 'Travel Diary - Verify Your Email Address',
+      subject: 'Vagabond - Verify Your Email Address',
       otp,
       type: 'VERIFICATION'
     });
@@ -206,7 +206,7 @@ exports.resendEmailOTP = async (req, res) => {
 
     await sendEmail({
       email: user.email,
-      subject: 'Travel Diary - Verify Your Email Address',
+      subject: 'Vagabond - Verify Your Email Address',
       otp,
       type: 'VERIFICATION'
     });
@@ -268,7 +268,7 @@ exports.login = async (req, res, next) => {
 
       await sendEmail({
         email: user.email,
-        subject: 'Travel Diary - Verify Your Email Address',
+        subject: 'Vagabond - Verify Your Email Address',
         otp,
         type: 'VERIFICATION'
       });
@@ -430,7 +430,7 @@ exports.forgotPassword = async (req, res) => {
 
     await sendEmail({
       email: user.email,
-      subject: 'Travel Diary - Password Reset OTP',
+      subject: 'Vagabond - Password Reset OTP',
       otp,
       type: 'RESET'
     });

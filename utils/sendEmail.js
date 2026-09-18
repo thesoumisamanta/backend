@@ -31,7 +31,7 @@ const sendEmail = async (options) => {
 
       const defaultHtml = otp
         ? `<div style="font-family: Arial, sans-serif; padding: 20px; color: #333;">
-            <h2 style="color: #2563eb;">Travel Diary ${type === 'RESET' ? 'Password Reset' : 'Email Verification'}</h2>
+            <h2 style="color: #2563eb;">Vagabond ${type === 'RESET' ? 'Password Reset' : 'Email Verification'}</h2>
             <p>Your 6-digit verification OTP code is:</p>
             <div style="background: #f1f5f9; padding: 15px; text-align: center; font-size: 24px; font-weight: bold; letter-spacing: 5px; color: #1e293b; border-radius: 8px; margin: 15px 0;">
               ${otp}
@@ -43,7 +43,7 @@ const sendEmail = async (options) => {
           </div>`;
 
       const mailOptions = {
-        from: `"${process.env.SMTP_FROM_NAME || 'Travel Diary'}" <${process.env.SMTP_FROM_EMAIL || process.env.SMTP_USER}>`,
+        from: `"${process.env.SMTP_FROM_NAME || 'Vagabond'}" <${process.env.SMTP_FROM_EMAIL || process.env.SMTP_USER}>`,
         to: email,
         subject: subject,
         text: message,

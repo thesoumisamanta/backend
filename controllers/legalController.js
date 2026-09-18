@@ -1,10 +1,10 @@
 // Controller for Legal Documents & App Metadata
 
-const TERMS_OF_SERVICE_TEXT = `TERMS OF SERVICE - VAGABOND (TRAVEL DIARY)
+const TERMS_OF_SERVICE_TEXT = `TERMS OF SERVICE - VAGABOND
 Effective Date: September 10, 2026
 Last Updated: September 10, 2026
 
-Welcome to Vagabond (also referred to as "Travel Diary", "we", "us", or "our"). 
+Welcome to Vagabond (also referred to as "we", "us", or "our"). 
 These Terms of Service ("Terms") govern your access to and use of our mobile 
 application, services, and website (collectively, the "Service").
 
@@ -120,15 +120,15 @@ after revised Terms are posted signifies your acceptance of the updated Terms.
 If you have any questions or concerns regarding these Terms of Service, please 
 contact us at:
 
-Vagabond / Travel Diary Legal & Support Team
+Vagabond Legal & Support Team
 Email: samantasoumi10@gmail.com
 Website: https://vagabond.clipboux.online`;
 
-const PRIVACY_POLICY_TEXT = `PRIVACY POLICY - VAGABOND (TRAVEL DIARY)
+const PRIVACY_POLICY_TEXT = `PRIVACY POLICY - VAGABOND
 Effective Date: September 10, 2026
 Last Updated: September 10, 2026
 
-Welcome to Vagabond (also referred to as "Travel Diary", "we", "us", or "our").
+Welcome to Vagabond (also referred to as "we", "us", or "our").
 We are committed to respecting your privacy and protecting your personal data. 
 This Privacy Policy explains how we collect, use, disclose, store, and safeguard 
 your information when you use our mobile application and related services 
@@ -266,7 +266,7 @@ acceptance of the revised Privacy Policy.
 If you have any questions, concerns, or requests regarding this Privacy Policy or 
 our data handling practices, please contact us at:
 
-Vagabond / Travel Diary Support Team
+Vagabond Support Team
 Email: samantasoumi10@gmail.com
 Website: https://vagabond.clipboux.online`;
 
@@ -277,7 +277,7 @@ const renderHtmlPage = (title, lastUpdated, contentHtml) => {
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>${title} | Vagabond (Travel Diary)</title>
+  <title>${title} | Vagabond</title>
   <style>
     :root {
       --bg-color: #0f172a;
@@ -401,7 +401,7 @@ const renderHtmlPage = (title, lastUpdated, contentHtml) => {
 <body>
   <div class="container">
     <div class="header">
-      <div class="brand">Vagabond (Travel Diary)</div>
+      <div class="brand">Vagabond</div>
       <h1>${title}</h1>
       <div class="dates">
         <span><strong>Effective Date:</strong> September 10, 2026</span> &bull; 
@@ -416,7 +416,7 @@ const renderHtmlPage = (title, lastUpdated, contentHtml) => {
       ${contentHtml}
     </div>
     <div class="footer">
-      &copy; 2026 Vagabond (Travel Diary). All rights reserved. &bull; <a href="mailto:samantasoumi10@gmail.com">samantasoumi10@gmail.com</a>
+      &copy; 2026 Vagabond. All rights reserved. &bull; <a href="mailto:samantasoumi10@gmail.com">samantasoumi10@gmail.com</a>
     </div>
   </div>
 </body>
@@ -452,7 +452,7 @@ exports.getTermsAndConditions = async (req, res) => {
 
     if (prefersHtml(req)) {
       const htmlContent = `
-        <p>Welcome to Vagabond (also referred to as "Travel Diary", "we", "us", or "our"). These Terms of Service ("Terms") govern your access to and use of our mobile application, services, and website (collectively, the "Service").</p>
+        <p>Welcome to Vagabond (also referred to as "we", "us", or "our"). These Terms of Service ("Terms") govern your access to and use of our mobile application, services, and website (collectively, the "Service").</p>
         <p>By creating an account, downloading, or using Vagabond, you agree to be bound by these Terms and our Privacy Policy. If you do not agree to these Terms, you must not use or access the Service.</p>
 
         <section>
@@ -543,7 +543,7 @@ exports.getTermsAndConditions = async (req, res) => {
           <h2>10. CONTACT INFORMATION</h2>
           <p>If you have any questions or concerns regarding these Terms of Service, please contact us at:</p>
           <p>
-            <strong>Vagabond / Travel Diary Legal & Support Team</strong><br>
+            <strong>Vagabond Legal & Support Team</strong><br>
             Email: <a href="mailto:samantasoumi10@gmail.com">samantasoumi10@gmail.com</a><br>
             Website: <a href="https://vagabond.clipboux.online" target="_blank" rel="noopener noreferrer">https://vagabond.clipboux.online</a>
           </p>
@@ -559,7 +559,7 @@ exports.getTermsAndConditions = async (req, res) => {
       success: true,
       message: "Terms of Service retrieved successfully",
       data: {
-        title: "Terms of Service - Vagabond (Travel Diary)",
+        title: "Terms of Service - Vagabond",
         effectiveDate: "September 10, 2026",
         lastUpdated: "September 10, 2026",
         version: "2.0",
@@ -567,7 +567,7 @@ exports.getTermsAndConditions = async (req, res) => {
         content: {
           // --- 100% Backwards-Compatible Fields (same keys and types as v1.0) ---
           introduction:
-            "Welcome to Vagabond (also referred to as \"Travel Diary\", \"we\", \"us\", or \"our\"). These Terms of Service (\"Terms\") govern your access to and use of our mobile application, services, and website (collectively, the \"Service\"). By creating an account, downloading, or using Vagabond, you agree to be bound by these Terms and our Privacy Policy. If you do not agree to these Terms, you must not use or access the Service.",
+            "Welcome to Vagabond (also referred to as \"we\", \"us\", or \"our\"). These Terms of Service (\"Terms\") govern your access to and use of our mobile application, services, and website (collectively, the \"Service\"). By creating an account, downloading, or using Vagabond, you agree to be bound by these Terms and our Privacy Policy. If you do not agree to these Terms, you must not use or access the Service.",
           userAccounts: [
             "1.1 Age Requirement: You must be at least 13 years old (or the legal minimum age in your jurisdiction) to create an account and use this Service.",
             "1.2 Account Security: You are responsible for maintaining the confidentiality of your account credentials and password. You accept full responsibility for all activities that occur under your account.",
@@ -642,7 +642,7 @@ exports.getTermsAndConditions = async (req, res) => {
           contactInformation: {
             title: "10. CONTACT INFORMATION",
             description: "If you have any questions or concerns regarding these Terms of Service, please contact us at:",
-            team: "Vagabond / Travel Diary Legal & Support Team",
+            team: "Vagabond Legal & Support Team",
             email: "samantasoumi10@gmail.com",
             website: "https://vagabond.clipboux.online"
           }
@@ -732,7 +732,7 @@ exports.getTermsAndConditions = async (req, res) => {
             sectionNumber: 10,
             title: "CONTACT INFORMATION",
             items: [
-              "If you have any questions or concerns regarding these Terms of Service, please contact us at: Vagabond / Travel Diary Legal & Support Team, Email: samantasoumi10@gmail.com, Website: https://vagabond.clipboux.online"
+              "If you have any questions or concerns regarding these Terms of Service, please contact us at: Vagabond Legal & Support Team, Email: samantasoumi10@gmail.com, Website: https://vagabond.clipboux.online"
             ]
           }
         ]
@@ -755,7 +755,7 @@ exports.getPrivacyPolicy = async (req, res) => {
 
     if (prefersHtml(req)) {
       const htmlContent = `
-        <p>Welcome to Vagabond (also referred to as "Travel Diary", "we", "us", or "our").<br>
+        <p>Welcome to Vagabond (also referred to as "we", "us", or "our").<br>
         We are committed to respecting your privacy and protecting your personal data. This Privacy Policy explains how we collect, use, disclose, store, and safeguard your information when you use our mobile application and related services (collectively, the "Application").</p>
         <p>Please read this Privacy Policy carefully. By creating an account or using the Application, you consent to the data practices described herein. If you do not agree with the terms of this Privacy Policy, please do not access or use the Application.</p>
 
@@ -861,7 +861,7 @@ exports.getPrivacyPolicy = async (req, res) => {
           <h2>10. CONTACT US</h2>
           <p>If you have any questions, concerns, or requests regarding this Privacy Policy or our data handling practices, please contact us at:</p>
           <p>
-            <strong>Vagabond / Travel Diary Support Team</strong><br>
+            <strong>Vagabond Support Team</strong><br>
             Email: <a href="mailto:samantasoumi10@gmail.com">samantasoumi10@gmail.com</a><br>
             Website: <a href="https://vagabond.clipboux.online" target="_blank" rel="noopener noreferrer">https://vagabond.clipboux.online</a>
           </p>
@@ -877,7 +877,7 @@ exports.getPrivacyPolicy = async (req, res) => {
       success: true,
       message: "Privacy policy retrieved successfully",
       data: {
-        title: "Privacy Policy - Vagabond (Travel Diary)",
+        title: "Privacy Policy - Vagabond",
         effectiveDate: "September 10, 2026",
         lastUpdated: "September 10, 2026",
         version: "2.0",
@@ -885,7 +885,7 @@ exports.getPrivacyPolicy = async (req, res) => {
         content: {
           // --- 100% Backwards-Compatible Fields (same keys and types as v1.0) ---
           introduction:
-            "Welcome to Vagabond (also referred to as \"Travel Diary\", \"we\", \"us\", or \"our\"). We are committed to respecting your privacy and protecting your personal data. This Privacy Policy explains how we collect, use, disclose, store, and safeguard your information when you use our mobile application and related services (collectively, the \"Application\"). Please read this Privacy Policy carefully. By creating an account or using the Application, you consent to the data practices described herein. If you do not agree with the terms of this Privacy Policy, please do not access or use the Application.",
+            "Welcome to Vagabond (also referred to as \"we\", \"us\", or \"our\"). We are committed to respecting your privacy and protecting your personal data. This Privacy Policy explains how we collect, use, disclose, store, and safeguard your information when you use our mobile application and related services (collectively, the \"Application\"). Please read this Privacy Policy carefully. By creating an account or using the Application, you consent to the data practices described herein. If you do not agree with the terms of this Privacy Policy, please do not access or use the Application.",
           informationCollected: [
             "Personal Information: Name, email address, username, password, profile details, and account type (Personal or Business).",
             "Profile Details: Profile picture, bio, and associated social link preferences.",
@@ -967,7 +967,7 @@ exports.getPrivacyPolicy = async (req, res) => {
           changesToPrivacyPolicy:
             "We may update our Privacy Policy from time to time. Any changes will be posted within the Application or on our official platform with an updated \"Last Updated\" date. Your continued use of the Application after changes become effective constitutes acceptance of the revised Privacy Policy.",
           contactUs: {
-            team: "Vagabond / Travel Diary Support Team",
+            team: "Vagabond Support Team",
             email: "samantasoumi10@gmail.com",
             website: "https://vagabond.clipboux.online"
           }
@@ -1083,7 +1083,7 @@ exports.getPrivacyPolicy = async (req, res) => {
             sectionNumber: 10,
             title: "CONTACT US",
             items: [
-              "If you have any questions, concerns, or requests regarding this Privacy Policy or our data handling practices, please contact us at: Vagabond / Travel Diary Support Team, Email: samantasoumi10@gmail.com, Website: https://vagabond.clipboux.online"
+              "If you have any questions, concerns, or requests regarding this Privacy Policy or our data handling practices, please contact us at: Vagabond Support Team, Email: samantasoumi10@gmail.com, Website: https://vagabond.clipboux.online"
             ]
           }
         ]
@@ -1104,7 +1104,7 @@ exports.getAppInfo = async (req, res) => {
       success: true,
       message: "App info retrieved successfully",
       data: {
-        appName: "Travel Diary",
+        appName: "Vagabond",
         brandName: "Vagabond",
         version: "1.0.0",
         supportEmail: "samantasoumi10@gmail.com",
