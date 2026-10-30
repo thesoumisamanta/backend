@@ -8,7 +8,7 @@ const sendEmail = async (options) => {
   if (otp) {
     console.log(`🔐 ${type} OTP GENERATED FOR: ${email}`);
     console.log(`🔑 OTP CODE: ${otp}`);
-    console.log(`⏰ EXPIRES IN: 10 MINUTES`);
+    console.log(`⏰ EXPIRES IN: 2 MINUTES`);
   } else {
     console.log(`📧 [${type}] EMAIL NOTIFICATION FOR: ${email}`);
     console.log(`📋 SUBJECT: ${subject}`);
@@ -36,7 +36,7 @@ const sendEmail = async (options) => {
             <div style="background: #f1f5f9; padding: 15px; text-align: center; font-size: 24px; font-weight: bold; letter-spacing: 5px; color: #1e293b; border-radius: 8px; margin: 15px 0;">
               ${otp}
             </div>
-            <p>This code will expire in 10 minutes. If you did not request this, please ignore this email.</p>
+            <p>This code will expire in 2 minutes. If you did not request this, please ignore this email.</p>
           </div>`
         : `<div style="font-family: Arial, sans-serif; padding: 20px; color: #333; line-height: 1.6;">
             <p>${message ? message.replace(/\n/g, '<br/>') : ''}</p>

@@ -76,7 +76,7 @@ exports.register = async (req, res, next) => {
       user.fullName = fullName;
       user.accountType = accountType || 'personal';
       user.emailVerificationOTP = otp;
-      user.emailVerificationOTPExpire = new Date(Date.now() + 10 * 60 * 1000);
+      user.emailVerificationOTPExpire = new Date(Date.now() + 2 * 60 * 1000);
       await user.save();
 
       await sendEmail({
@@ -104,7 +104,7 @@ exports.register = async (req, res, next) => {
       accountType: accountType || 'personal',
       isEmailVerified: false,
       emailVerificationOTP: otp,
-      emailVerificationOTPExpire: new Date(Date.now() + 10 * 60 * 1000)
+      emailVerificationOTPExpire: new Date(Date.now() + 2 * 60 * 1000)
     });
 
     await sendEmail({
@@ -201,7 +201,7 @@ exports.resendEmailOTP = async (req, res) => {
     const otp = Math.floor(100000 + Math.random() * 900000).toString();
 
     user.emailVerificationOTP = otp;
-    user.emailVerificationOTPExpire = new Date(Date.now() + 10 * 60 * 1000);
+    user.emailVerificationOTPExpire = new Date(Date.now() + 2 * 60 * 1000);
     await user.save({ validateBeforeSave: false });
 
     await sendEmail({
@@ -263,7 +263,7 @@ exports.login = async (req, res, next) => {
       // Auto-generate fresh 6-digit verification OTP
       const otp = Math.floor(100000 + Math.random() * 900000).toString();
       user.emailVerificationOTP = otp;
-      user.emailVerificationOTPExpire = new Date(Date.now() + 10 * 60 * 1000);
+      user.emailVerificationOTPExpire = new Date(Date.now() + 2 * 60 * 1000);
       await user.save({ validateBeforeSave: false });
 
       await sendEmail({
@@ -425,7 +425,7 @@ exports.forgotPassword = async (req, res) => {
     const otp = Math.floor(100000 + Math.random() * 900000).toString();
 
     user.resetPasswordOTP = otp;
-    user.resetPasswordOTPExpire = new Date(Date.now() + 10 * 60 * 1000); // 10 minutes expiry
+    user.resetPasswordOTPExpire = new Date(Date.now() + 2 * 60 * 1000); // 10 minutes expiry
     await user.save({ validateBeforeSave: false });
 
     await sendEmail({
