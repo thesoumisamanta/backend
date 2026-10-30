@@ -21,10 +21,14 @@ const messageSchema = new mongoose.Schema({
     type: String,
     maxlength: 5000
   },
+  // IMPORTANT: wrap every sub-field in { type: X } notation to prevent Mongoose
+  // from misreading the `type` key as a schema-type declaration for the whole field.
+  // Without this, `media: { type: String }` causes Mongoose to treat `media` as a
+  // plain String, which throws "Cast to string failed" when an object is assigned.
   media: {
-    public_id: String,
-    url: String,
-    type: String
+    public_id: { type: String, default: null },
+    url:       { type: String, default: null },
+    type:      { type: String, default: null }   // 'image' | 'video' | 'audio'
   },
   // FIX 6: Reply-to-message (WhatsApp-style message quoting)
   replyTo: {
