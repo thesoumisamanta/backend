@@ -13,7 +13,8 @@ const messageSchema = new mongoose.Schema({
   },
   messageType: {
     type: String,
-    enum: ['text', 'image', 'video', 'post', 'story_reply'],
+    // FIX 7: Added 'audio' type support
+    enum: ['text', 'image', 'video', 'audio', 'post', 'story_reply'],
     default: 'text'
   },
   text: {
@@ -25,6 +26,12 @@ const messageSchema = new mongoose.Schema({
     url: String,
     type: String
   },
+  // FIX 6: Reply-to-message (WhatsApp-style message quoting)
+  replyTo: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Message',
+    default: null
+  },
   sharedPost: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'Post'
@@ -32,6 +39,12 @@ const messageSchema = new mongoose.Schema({
   sharedStory: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'Story'
+  },
+  // FIX 2 & 3: WhatsApp-style delivery status (sent → delivered → read)
+  status: {
+    type: String,
+    enum: ['sent', 'delivered', 'read'],
+    default: 'sent'
   },
   readBy: [{
     user: {
@@ -68,7 +81,9 @@ const messageSchema = new mongoose.Schema({
   }
 });
 
-// Index for faster queries
+// Indexes for faster queries
 messageSchema.index({ chat: 1, createdAt: -1 });
+messageSchema.index({ chat: 1, sender: 1, status: 1 }); // For delivered-on-reconnect query
+messageSchema.index({ chat: 1, text: 'text' }); // For message search (FIX 12)
 
 module.exports = mongoose.model('Message', messageSchema);
