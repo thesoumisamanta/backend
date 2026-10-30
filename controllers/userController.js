@@ -1,7 +1,7 @@
 const User = require('../models/user.js');
 const Notification = require('../models/notification.js');
 const { uploadImage, deleteFile } = require('../utils/cloudinary');
-const { sendNotification } = require('../config/firebase');
+const { createNotification } = require('../utils/notificationHelper');
 
 // Get user profile
 exports.getUserProfile = async (req, res) => {
@@ -163,22 +163,16 @@ exports.followUnfollowUser = async (req, res) => {
       await currentUser.save();
       await userToFollow.save();
 
-      // Create notification
-      const notification = await Notification.create({
-        recipient: userToFollow._id,
-        sender: currentUser._id,
+      // FIX 2: Use createNotification — handles DB + socket + FCM in one call
+      createNotification({
+        recipientId: userToFollow._id,
+        senderId: currentUser._id,
         type: 'follow',
-        message: `${currentUser.username} started following you`
+        message: `${currentUser.username} started following you`,
+        fcmTitle: 'New Follower',
+        fcmBody: `${currentUser.username} started following you`,
+        fcmData: { userId: currentUser._id.toString() }
       });
-
-      // Send push notification
-      if (userToFollow.fcmToken) {
-        await sendNotification(
-          userToFollow.fcmToken,
-          'New Follower',
-          `${currentUser.username} started following you`
-        );
-      }
 
       res.status(200).json({
         success: true,

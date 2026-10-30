@@ -1,25 +1,24 @@
 const Notification = require('../models/notification.js');
+const { emitToUser } = require('../config/socket.js');
 
-// Get notifications
+// ─────────────────────────────────────────────────────────────────────────────
+// Get notifications (paginated)
+// ─────────────────────────────────────────────────────────────────────────────
 exports.getNotifications = async (req, res) => {
   try {
     const page = parseInt(req.query.page) || 1;
     const limit = parseInt(req.query.limit) || 20;
     const skip = (page - 1) * limit;
 
-    const notifications = await Notification.find({
-      recipient: req.user.id
-    })
+    const notifications = await Notification.find({ recipient: req.user.id })
       .populate('sender', 'username fullName profilePicture accountType isVerified')
       .populate('post', 'media caption')
+      .populate('story', 'media')
       .sort({ createdAt: -1 })
       .skip(skip)
       .limit(limit);
 
-    const total = await Notification.countDocuments({
-      recipient: req.user.id
-    });
-
+    const total = await Notification.countDocuments({ recipient: req.user.id });
     const unreadCount = await Notification.countDocuments({
       recipient: req.user.id,
       isRead: false
@@ -36,23 +35,19 @@ exports.getNotifications = async (req, res) => {
       }
     });
   } catch (error) {
-    res.status(500).json({
-      success: false,
-      message: error.message
-    });
+    res.status(500).json({ success: false, message: error.message });
   }
 };
 
-// Mark notification as read
+// ─────────────────────────────────────────────────────────────────────────────
+// Mark single notification as read
+// ─────────────────────────────────────────────────────────────────────────────
 exports.markAsRead = async (req, res) => {
   try {
     const notification = await Notification.findById(req.params.id);
 
     if (!notification) {
-      return res.status(404).json({
-        success: false,
-        message: 'Notification not found'
-      });
+      return res.status(404).json({ success: false, message: 'Notification not found' });
     }
 
     if (notification.recipient.toString() !== req.user.id) {
@@ -71,14 +66,14 @@ exports.markAsRead = async (req, res) => {
       data: null
     });
   } catch (error) {
-    res.status(500).json({
-      success: false,
-      message: error.message
-    });
+    res.status(500).json({ success: false, message: error.message });
   }
 };
 
-// Mark all notifications as read
+// ─────────────────────────────────────────────────────────────────────────────
+// Mark ALL notifications as read
+// FIX 8: Emit socket event to update badge count across all user devices
+// ─────────────────────────────────────────────────────────────────────────────
 exports.markAllAsRead = async (req, res) => {
   try {
     await Notification.updateMany(
@@ -86,29 +81,28 @@ exports.markAllAsRead = async (req, res) => {
       { isRead: true }
     );
 
+    // Emit real-time badge reset to all user's devices
+    emitToUser(req.user.id, 'notifications_all_read', { unreadCount: 0 });
+
     res.status(200).json({
       success: true,
       message: 'All notifications marked as read',
       data: null
     });
   } catch (error) {
-    res.status(500).json({
-      success: false,
-      message: error.message
-    });
+    res.status(500).json({ success: false, message: error.message });
   }
 };
 
-// Delete notification
+// ─────────────────────────────────────────────────────────────────────────────
+// Delete single notification
+// ─────────────────────────────────────────────────────────────────────────────
 exports.deleteNotification = async (req, res) => {
   try {
     const notification = await Notification.findById(req.params.id);
 
     if (!notification) {
-      return res.status(404).json({
-        success: false,
-        message: 'Notification not found'
-      });
+      return res.status(404).json({ success: false, message: 'Notification not found' });
     }
 
     if (notification.recipient.toString() !== req.user.id) {
@@ -126,9 +120,26 @@ exports.deleteNotification = async (req, res) => {
       data: null
     });
   } catch (error) {
-    res.status(500).json({
-      success: false,
-      message: error.message
+    res.status(500).json({ success: false, message: error.message });
+  }
+};
+
+// ─────────────────────────────────────────────────────────────────────────────
+// FIX 9: Delete ALL notifications for current user
+// ─────────────────────────────────────────────────────────────────────────────
+exports.deleteAllNotifications = async (req, res) => {
+  try {
+    await Notification.deleteMany({ recipient: req.user.id });
+
+    // Emit real-time badge clear
+    emitToUser(req.user.id, 'notifications_all_read', { unreadCount: 0 });
+
+    res.status(200).json({
+      success: true,
+      message: 'All notifications deleted successfully',
+      data: null
     });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
   }
 };

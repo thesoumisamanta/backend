@@ -2,9 +2,13 @@ const Comment = require('../models/comment.js');
 const Post = require('../models/post.js');
 const User = require('../models/user.js');
 const Notification = require('../models/notification.js');
-const { sendNotification } = require('../config/firebase');
+const { createNotification, extractMentions } = require('../utils/notificationHelper');
 
-// Create comment
+// ─────────────────────────────────────────────────────────────────────────────
+// Create comment or reply
+// FIX 2: Uses createNotification (DB + socket + FCM)
+// FIX 5: Parses @mentions and notifies tagged users
+// ─────────────────────────────────────────────────────────────────────────────
 exports.createComment = async (req, res) => {
   try {
     const { text, parentCommentId } = req.body;
@@ -12,23 +16,16 @@ exports.createComment = async (req, res) => {
 
     const post = await Post.findById(postId);
     if (!post) {
-      return res.status(404).json({
-        success: false,
-        message: 'Post not found'
-      });
+      return res.status(404).json({ success: false, message: 'Post not found' });
     }
 
     let depth = 0;
     let parentComment = null;
 
-    // If this is a reply, get parent comment info
     if (parentCommentId) {
       parentComment = await Comment.findById(parentCommentId);
       if (!parentComment) {
-        return res.status(404).json({
-          success: false,
-          message: 'Parent comment not found'
-        });
+        return res.status(404).json({ success: false, message: 'Parent comment not found' });
       }
       depth = (parentComment.depth || 0) + 1;
     }
@@ -43,61 +40,80 @@ exports.createComment = async (req, res) => {
 
     await comment.populate('user', 'username fullName profilePicture accountType isVerified');
 
-    // Update post comment count
+    // Update counts
     post.commentsCount += 1;
     await post.save();
 
-    // Update parent comment reply count
     if (parentCommentId) {
-      await Comment.findByIdAndUpdate(parentCommentId, {
-        $inc: { repliesCount: 1 }
+      await Comment.findByIdAndUpdate(parentCommentId, { $inc: { repliesCount: 1 } });
+    }
+
+    // ── Notify post owner (if not self) ────────────────────────────────
+    const postOwnerId = post.user.toString();
+    if (postOwnerId !== req.user.id) {
+      createNotification({
+        recipientId: postOwnerId,
+        senderId: req.user._id,
+        type: parentCommentId ? 'reply' : 'comment',
+        message: parentCommentId
+          ? `${req.user.username} replied to a comment on your post`
+          : `${req.user.username} commented on your post`,
+        postId: post._id,
+        commentId: comment._id,
+        fcmTitle: parentCommentId ? 'New Reply' : 'New Comment',
+        fcmBody: text.substring(0, 100),
+        fcmData: { postId: post._id.toString(), commentId: comment._id.toString() }
       });
     }
 
-    // Create notification
-    if (post.user.toString() !== req.user.id) {
-      const postOwner = await User.findById(post.user);
-
-      await Notification.create({
-        recipient: post.user,
-        sender: req.user.id,
-        type: parentCommentId ? 'reply' : 'comment',
-        post: postId,
-        comment: comment._id,
-        message: parentCommentId
-          ? `${req.user.username} replied to a comment`
-          : `${req.user.username} commented on your post`
-      });
-
-      // Send push notification
-      if (postOwner && postOwner.fcmToken) {
-        await sendNotification(
-          postOwner.fcmToken,
-          parentCommentId ? 'New Reply' : 'New Comment',
-          text.substring(0, 100)
-        );
+    // ── Notify parent comment owner when someone replies ────────────────
+    if (parentCommentId && parentComment) {
+      const parentCommentOwnerId = parentComment.user.toString();
+      if (parentCommentOwnerId !== req.user.id && parentCommentOwnerId !== postOwnerId) {
+        createNotification({
+          recipientId: parentCommentOwnerId,
+          senderId: req.user._id,
+          type: 'reply',
+          message: `${req.user.username} replied to your comment`,
+          postId: post._id,
+          commentId: comment._id,
+          fcmTitle: 'New Reply',
+          fcmBody: text.substring(0, 100),
+          fcmData: { postId: post._id.toString(), commentId: comment._id.toString() }
+        });
       }
     }
 
-    // Notify parent comment owner if replying
-    if (parentCommentId && parentComment.user.toString() !== req.user.id) {
-      const commentOwner = await User.findById(parentComment.user);
+    // ── FIX 5: Parse @mentions and notify each tagged user ──────────────
+    const mentionedUsernames = extractMentions(text);
+    if (mentionedUsernames.length > 0) {
+      const mentionedUsers = await User.find({
+        username: { $in: mentionedUsernames }
+      }).select('_id username');
 
-      await Notification.create({
-        recipient: parentComment.user,
-        sender: req.user.id,
-        type: 'reply',
-        post: postId,
-        comment: comment._id,
-        message: `${req.user.username} replied to your comment`
-      });
+      // Notify mentioned users (except self, post owner, parent comment owner — already notified above)
+      const alreadyNotified = new Set([
+        req.user.id,
+        postOwnerId,
+        parentComment?.user?.toString()
+      ].filter(Boolean));
 
-      if (commentOwner && commentOwner.fcmToken) {
-        await sendNotification(
-          commentOwner.fcmToken,
-          'New Reply',
-          text.substring(0, 100)
-        );
+      for (const mentionedUser of mentionedUsers) {
+        const mentionedId = mentionedUser._id.toString();
+        if (!alreadyNotified.has(mentionedId)) {
+          createNotification({
+            recipientId: mentionedUser._id,
+            senderId: req.user._id,
+            type: 'mention',
+            message: `${req.user.username} mentioned you in a comment`,
+            postId: post._id,
+            commentId: comment._id,
+            fcmTitle: 'You were mentioned',
+            fcmBody: text.substring(0, 100),
+            fcmData: { postId: post._id.toString() }
+          });
+          alreadyNotified.add(mentionedId);
+        }
       }
     }
 
@@ -113,21 +129,19 @@ exports.createComment = async (req, res) => {
       }
     });
   } catch (error) {
-    res.status(500).json({
-      success: false,
-      message: error.message
-    });
+    res.status(500).json({ success: false, message: error.message });
   }
 };
 
-// Get post comments
+// ─────────────────────────────────────────────────────────────────────────────
+// Get post comments (paginated)
+// ─────────────────────────────────────────────────────────────────────────────
 exports.getPostComments = async (req, res) => {
   try {
     const page = parseInt(req.query.page) || 1;
     const limit = parseInt(req.query.limit) || 20;
     const skip = (page - 1) * limit;
 
-    // Get only parent comments (not replies), including deleted comments if they have replies
     const filter = {
       post: req.params.postId,
       parentComment: null,
@@ -146,32 +160,28 @@ exports.getPostComments = async (req, res) => {
 
     const total = await Comment.countDocuments(filter);
 
-    // Add hasLiked and hasDisliked flags
-    const commentsWithFlags = comments.map(comment => ({
-      ...comment,
-      hasLiked: comment.likes.some(id => id.toString() === req.user.id),
-      hasDisliked: comment.dislikes.some(id => id.toString() === req.user.id)
-    }));
-
     res.status(200).json({
       success: true,
       message: 'Comments retrieved successfully',
       data: {
-        comments: commentsWithFlags,
+        comments: comments.map(c => ({
+          ...c,
+          hasLiked: c.likes.some(id => id.toString() === req.user.id),
+          hasDisliked: c.dislikes.some(id => id.toString() === req.user.id)
+        })),
         currentPage: page,
         totalPages: Math.ceil(total / limit),
         totalComments: total
       }
     });
   } catch (error) {
-    res.status(500).json({
-      success: false,
-      message: error.message
-    });
+    res.status(500).json({ success: false, message: error.message });
   }
 };
 
-// Get comment replies
+// ─────────────────────────────────────────────────────────────────────────────
+// Get comment replies (paginated)
+// ─────────────────────────────────────────────────────────────────────────────
 exports.getCommentReplies = async (req, res) => {
   try {
     const page = parseInt(req.query.page) || 1;
@@ -195,42 +205,35 @@ exports.getCommentReplies = async (req, res) => {
 
     const total = await Comment.countDocuments(filter);
 
-    // Add hasLiked and hasDisliked flags
-    const repliesWithFlags = replies.map(reply => ({
-      ...reply,
-      hasLiked: reply.likes.some(id => id.toString() === req.user.id),
-      hasDisliked: reply.dislikes.some(id => id.toString() === req.user.id)
-    }));
-
     res.status(200).json({
       success: true,
       message: 'Comment replies retrieved successfully',
       data: {
-        replies: repliesWithFlags,
+        replies: replies.map(r => ({
+          ...r,
+          hasLiked: r.likes.some(id => id.toString() === req.user.id),
+          hasDisliked: r.dislikes.some(id => id.toString() === req.user.id)
+        })),
         currentPage: page,
         totalPages: Math.ceil(total / limit),
         totalReplies: total
       }
     });
   } catch (error) {
-    res.status(500).json({
-      success: false,
-      message: error.message
-    });
+    res.status(500).json({ success: false, message: error.message });
   }
 };
 
-// Update/Edit comment
+// ─────────────────────────────────────────────────────────────────────────────
+// Update / Edit comment
+// ─────────────────────────────────────────────────────────────────────────────
 exports.updateComment = async (req, res) => {
   try {
     const { text } = req.body;
     const comment = await Comment.findById(req.params.id);
 
     if (!comment) {
-      return res.status(404).json({
-        success: false,
-        message: 'Comment not found'
-      });
+      return res.status(404).json({ success: false, message: 'Comment not found' });
     }
 
     if (comment.user.toString() !== req.user.id) {
@@ -259,81 +262,63 @@ exports.updateComment = async (req, res) => {
       }
     });
   } catch (error) {
-    res.status(500).json({
-      success: false,
-      message: error.message
-    });
+    res.status(500).json({ success: false, message: error.message });
   }
 };
 
+// ─────────────────────────────────────────────────────────────────────────────
 // Get users who liked a comment
+// ─────────────────────────────────────────────────────────────────────────────
 exports.getCommentLikes = async (req, res) => {
   try {
     const comment = await Comment.findById(req.params.id)
       .populate('likes', 'username fullName profilePicture accountType isVerified');
 
     if (!comment) {
-      return res.status(404).json({
-        success: false,
-        message: 'Comment not found'
-      });
+      return res.status(404).json({ success: false, message: 'Comment not found' });
     }
 
     res.status(200).json({
       success: true,
       message: 'Users who liked comment retrieved successfully',
-      data: {
-        users: comment.likes,
-        count: comment.likesCount
-      }
+      data: { users: comment.likes, count: comment.likesCount }
     });
   } catch (error) {
-    res.status(500).json({
-      success: false,
-      message: error.message
-    });
+    res.status(500).json({ success: false, message: error.message });
   }
 };
 
+// ─────────────────────────────────────────────────────────────────────────────
 // Get users who disliked a comment
+// ─────────────────────────────────────────────────────────────────────────────
 exports.getCommentDislikes = async (req, res) => {
   try {
     const comment = await Comment.findById(req.params.id)
       .populate('dislikes', 'username fullName profilePicture accountType isVerified');
 
     if (!comment) {
-      return res.status(404).json({
-        success: false,
-        message: 'Comment not found'
-      });
+      return res.status(404).json({ success: false, message: 'Comment not found' });
     }
 
     res.status(200).json({
       success: true,
       message: 'Users who disliked comment retrieved successfully',
-      data: {
-        users: comment.dislikes,
-        count: comment.dislikesCount
-      }
+      data: { users: comment.dislikes, count: comment.dislikesCount }
     });
   } catch (error) {
-    res.status(500).json({
-      success: false,
-      message: error.message
-    });
+    res.status(500).json({ success: false, message: error.message });
   }
 };
 
-// Like/Unlike comment
+// ─────────────────────────────────────────────────────────────────────────────
+// Like / Unlike comment
+// FIX 5: Now uses createNotification (adds socket + FCM that was missing)
+// ─────────────────────────────────────────────────────────────────────────────
 exports.likeComment = async (req, res) => {
   try {
     const comment = await Comment.findById(req.params.id);
-
     if (!comment) {
-      return res.status(404).json({
-        success: false,
-        message: 'Comment not found'
-      });
+      return res.status(404).json({ success: false, message: 'Comment not found' });
     }
 
     const hasLiked = comment.likes.includes(req.user.id);
@@ -351,17 +336,18 @@ exports.likeComment = async (req, res) => {
         comment.dislikesCount = Math.max(0, comment.dislikesCount - 1);
       }
 
-      // Create notification
-      if (comment.user.toString() !== req.user.id) {
-        await Notification.create({
-          recipient: comment.user,
-          sender: req.user.id,
-          type: 'like',
-          comment: comment._id,
-          post: comment.post,
-          message: `${req.user.username} liked your comment`
-        });
-      }
+      // FIX 5: createNotification now handles DB + socket + FCM (was missing FCM before)
+      createNotification({
+        recipientId: comment.user,
+        senderId: req.user._id,
+        type: 'like',
+        message: `${req.user.username} liked your comment`,
+        postId: comment.post,
+        commentId: comment._id,
+        fcmTitle: 'New Like',
+        fcmBody: `${req.user.username} liked your comment`,
+        fcmData: { commentId: comment._id.toString() }
+      });
     }
 
     await comment.save();
@@ -377,23 +363,18 @@ exports.likeComment = async (req, res) => {
       }
     });
   } catch (error) {
-    res.status(500).json({
-      success: false,
-      message: error.message
-    });
+    res.status(500).json({ success: false, message: error.message });
   }
 };
 
-// Dislike comment
+// ─────────────────────────────────────────────────────────────────────────────
+// Dislike comment (no notification per design)
+// ─────────────────────────────────────────────────────────────────────────────
 exports.dislikeComment = async (req, res) => {
   try {
     const comment = await Comment.findById(req.params.id);
-
     if (!comment) {
-      return res.status(404).json({
-        success: false,
-        message: 'Comment not found'
-      });
+      return res.status(404).json({ success: false, message: 'Comment not found' });
     }
 
     const hasLiked = comment.likes.includes(req.user.id);
@@ -405,7 +386,6 @@ exports.dislikeComment = async (req, res) => {
     } else {
       comment.dislikes.push(req.user.id);
       comment.dislikesCount += 1;
-
       if (hasLiked) {
         comment.likes.pull(req.user.id);
         comment.likesCount = Math.max(0, comment.likesCount - 1);
@@ -425,23 +405,18 @@ exports.dislikeComment = async (req, res) => {
       }
     });
   } catch (error) {
-    res.status(500).json({
-      success: false,
-      message: error.message
-    });
+    res.status(500).json({ success: false, message: error.message });
   }
 };
 
+// ─────────────────────────────────────────────────────────────────────────────
 // Delete comment (soft delete)
+// ─────────────────────────────────────────────────────────────────────────────
 exports.deleteComment = async (req, res) => {
   try {
     const comment = await Comment.findById(req.params.id);
-
     if (!comment) {
-      return res.status(404).json({
-        success: false,
-        message: 'Comment not found'
-      });
+      return res.status(404).json({ success: false, message: 'Comment not found' });
     }
 
     if (comment.user.toString() !== req.user.id) {
@@ -451,21 +426,14 @@ exports.deleteComment = async (req, res) => {
       });
     }
 
-    // Soft delete
     comment.isDeleted = true;
     comment.text = '[Deleted]';
     await comment.save();
 
-    // Update post comment count
-    await Post.findByIdAndUpdate(comment.post, {
-      $inc: { commentsCount: -1 }
-    });
+    await Post.findByIdAndUpdate(comment.post, { $inc: { commentsCount: -1 } });
 
-    // Update parent comment reply count
     if (comment.parentComment) {
-      await Comment.findByIdAndUpdate(comment.parentComment, {
-        $inc: { repliesCount: -1 }
-      });
+      await Comment.findByIdAndUpdate(comment.parentComment, { $inc: { repliesCount: -1 } });
     }
 
     res.status(200).json({
@@ -474,9 +442,6 @@ exports.deleteComment = async (req, res) => {
       data: null
     });
   } catch (error) {
-    res.status(500).json({
-      success: false,
-      message: error.message
-    });
+    res.status(500).json({ success: false, message: error.message });
   }
 };
